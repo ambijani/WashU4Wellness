@@ -1,37 +1,38 @@
 const sgMail = require('@sendgrid/mail');
 const User = require('../schemas/User');  // Import User model
 const { generateUsername, assignChallengesToNewUser } = require('../helper.js');
-const mongoose = require('mongoose'); 
+const mongoose = require('mongoose');
 
 // Set the SendGrid API key from your environment variables
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
 
 const verifyToken = async (email, token) => {
   if (!email || !token) {
     throw new Error('Email and token are required for verification.');
   }
-
   const user = await User.findOneAndUpdate(
-    { 
-      email, 
+    {
+      email,
       twoFactorCode: token,
       twoFactorExpires: { $gt: Date.now() }
     },
-    { 
-      isVerified: true, 
+    {
+      isVerified: true,
       $unset: { twoFactorCode: "", twoFactorExpires: "" }
     },
     { new: true }
   );
-
   if (!user) {
     throw new Error('Invalid or expired token');
   }
-
-  // check if there are challenges to assign to this user
-  await assignChallengesToNewUser(user._id);
-
+  console.log('User verified:', user.email);
+  // Assign challenges to this user using email
+  try {
+    await assignChallengesToNewUser(email);
+  } catch (error) {
+    console.error('Error assigning challenges:', error);
+    // Decide whether to throw this error or handle it silently
+  }
   return user;
 };
 
@@ -39,23 +40,22 @@ const updateUserTags = async (email, tags) => {
   if (!email || !tags) {
     throw new Error('Email and tags are required');
   }
-  const user = await User.findOne({ email });
+  const user = await User.findOneAndUpdate(
+    { email },
+    { $set: { tags: tags } },
+    { new: true }
+  );
   if (!user) {
     throw new Error('User not found');
   }
-
-  user.tags = tags;
-  await user.save();
-
   // Reassign challenges based on new tags
-  await assignChallengesToNewUser(email); 
-
+  await assignChallengesToNewUser(email);
   return user;
 };
 
 const sendVerificationEmail = async (email) => {
   if (!email) {
-    return res.status(400).json({ message: 'Email is required' });
+    throw new Error('Email is required');
   }
   const username = generateUsername(email);
   if (!username) {

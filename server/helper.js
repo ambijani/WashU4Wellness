@@ -1,63 +1,73 @@
 const mongoose = require('mongoose');
-const { Challenge } = require('./schemas/Challenge'); 
-const { User } = require('./schemas/User');  
-const { Team } = require('./schemas/Team'); 
+const User = require('./schemas/User');
+const Challenge = require('./schemas/Challenge');
+const Team = require('./schemas/Team');
 
 const generateUsername = email => email.split('@')[0];
+
 const range = (start, end) => Array.from({ length: end - start + 1 }, (_, i) => (start + i).toString());
+
 const getAllTags = () => {
   const yearOf = range(2020, 2025);
-    const major = [
-      'Computer Eng.',
-      'Computer Sci.',
-      'Software Eng.',
-      'Electrical Eng.',
-      'Mechanical Eng.',
-      'Civil Eng.',
-      'Biomedical Eng.',
-      'Data Science',
-      'Information Technology',
-      'Physics',
-      'Mathematics'
-    ];
-    const housing = [
-      'Bear Beginnings',
-      'Umrath House',
-      'Liggett House',
-      'Rubelmann Hall',
-      'Eliot House',
-      'Shanedling House',
-      'Dardick House',
-      'Thomas H. Eliot Residential College',
-      'Park/Mudd Residential College',
-      'Koenig Residential College',
-      'South 40 House',
-      'The Village',
-      'Millbrook Apartments',
-      'Lofts Apartments',
-      'off campus'
-    ];
-    const clubs = ['ACM', 'DBF', 'MSA', 'IEEE', 'WU Racing', ''];
-    const tags = { yearOf, major, housing, clubs };
-}
-const assignChallengesToNewUser = async userId => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
+  const major = [
+    'Computer Eng.',
+    'Computer Sci.',
+    'Software Eng.',
+    'Electrical Eng.',
+    'Mechanical Eng.',
+    'Civil Eng.',
+    'Biomedical Eng.',
+    'Data Science',
+    'Information Technology',
+    'Physics',
+    'Mathematics'
+  ];
+  const housing = [
+    'Bear Beginnings',
+    'Umrath House',
+    'Liggett House',
+    'Rubelmann Hall',
+    'Eliot House',
+    'Shanedling House',
+    'Dardick House',
+    'Thomas H. Eliot Residential College',
+    'Park/Mudd Residential College',
+    'Koenig Residential College',
+    'South 40 House',
+    'The Village',
+    'Millbrook Apartments',
+    'Lofts Apartments',
+    'off campus'
+  ];
+  const clubs = ['ACM', 'DBF', 'MSA', 'IEEE', 'WU Racing', ''];
+  return { yearOf, major, housing, clubs };
+};
 
+const assignChallengesToNewUser = async (email) => {
+  let session;
   try {
-    // Fetch the user
-    const user = await User.findById(userId).session(session);
+    console.log('Starting assignChallengesToNewUser for email:', email);
+    console.log('User model available:', !!User);
+
+    session = await mongoose.startSession();
+    session.startTransaction();
+    console.log(email);
+    // Fetch the user by email
+    const user = await User.findOne({ email }).session(session);
+    console.log('User found:', !!user);
     if (!user) {
       throw new Error('User not found');
     }
 
     // Fetch all active challenges
     const currentDate = new Date();
+    console.log('Fetching active challenges...');
     const activeChallenges = await Challenge.find({
       startDateTime: { $lte: currentDate },
       endDateTime: { $gte: currentDate }
     }).session(session);
-
+    console.log('Active challenges found:', activeChallenges.length);
+    
     // Array to store challenges to be assigned
     const challengesToAssign = [];
     const teamUpdates = [];
@@ -90,10 +100,10 @@ const assignChallengesToNewUser = async userId => {
           // Prepare challenge update
           challengeUpdates.push({
             updateOne: {
-              filter: { _id: challenge._id },
+              filter: { _id: challenge._id },  // Changed from *id to _id
               update: {
                 $addToSet: {
-                  'leaderboard.users': { userId: user._id, score: 0 },
+                  'leaderboard.users': { userId: user._id, email: user.email, score: 0 },
                   'leaderboard.teams': { teamTags: challengeTagSet, score: 0 }
                 }
               }
@@ -107,8 +117,8 @@ const assignChallengesToNewUser = async userId => {
 
     // Perform bulk operations
     if (challengesToAssign.length > 0) {
-      await User.findByIdAndUpdate(
-        userId,
+      await User.findOneAndUpdate(
+        { email },
         { $push: { assignedChallenges: { $each: challengesToAssign } } },
         { session }
       );
@@ -123,14 +133,18 @@ const assignChallengesToNewUser = async userId => {
     }
 
     await session.commitTransaction();
-    console.log(`Assigned ${challengesToAssign.length} challenges to user ${userId}`);
+    console.log(`Assigned ${challengesToAssign.length} challenges to user ${email}`);
     return challengesToAssign;
   } catch (error) {
-    await session.abortTransaction();
+    if (session) {
+      await session.abortTransaction();
+    }
     console.error('Error in assignChallengesToNewUser:', error);
     throw error;
   } finally {
-    session.endSession();
+    if (session) {
+      session.endSession();
+    }
   }
 };
 

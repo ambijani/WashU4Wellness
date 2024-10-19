@@ -52,4 +52,4 @@ challengeSchema.pre('save', function(next) {
 });
 
 const Challenge = mongoose.model('Challenge', challengeSchema);
-module.exports = { Challenge, Counter };
+module.exports = Challenge;
