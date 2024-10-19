@@ -21,49 +21,40 @@ export default function VerificationScreen({ navigation }) {
     getEmail();
   }, []);
 
-  // Handle changes for individual inputs and pasting
+  // Handle text changes and detect backspace
   const handleChangeText = (text, index) => {
+    const newCode = [...code];
+
+    // Detect backspace (when text is empty but there's already a value)
+    if (text === '' && code[index] !== '' && index > 0) {
+      inputRefs.current[index - 1].focus(); // Move to the previous input
+    }
+
     if (text.length > 1) {
-      // If a paste event occurs (text is more than one character)
-      handlePaste(text);
+      handlePaste(text); // Handle pasting multiple digits
     } else {
-      // Single character change, update state and move focus
-      const newCode = [...code];
       newCode[index] = text;
       setCode(newCode);
 
-      // Move focus to the next input when a digit is entered
+      // Move to the next input if there is a valid digit and we're not at the last input
       if (text && index < 5) {
         inputRefs.current[index + 1].focus();
-      }
-
-      // Move back if the input is cleared
-      if (!text && index > 0) {
-        inputRefs.current[index - 1].focus();
       }
     }
   };
 
   const handlePaste = (text) => {
-    const newCode = text.slice(0, 6).split(''); // Only consider the first 6 digits
+    const newCode = text.split('').slice(0, 6); // Split text, only take first 6 digits
     setCode(newCode);
 
-    // Update the inputs and set the native props for each field
-    newCode.forEach((digit, i) => {
-      inputRefs.current[i].setNativeProps({ text: digit });
-    });
-
-    // Focus on the last filled input field
-    if (newCode.length < 6) {
-      inputRefs.current[newCode.length].focus();
-    } else {
-      inputRefs.current[5].focus();
-    }
+    // Focus the last filled input box
+    const nextFocusIndex = newCode.length === 6 ? 5 : newCode.length;
+    inputRefs.current[nextFocusIndex].focus();
   };
 
   const handleVerify = async () => {
     const verificationCode = code.join('');
-    
+
     if (verificationCode.length === 6) {
       try {
         const response = await fetch(`http://localhost:3000/verify-token/${verificationCode}`, {
@@ -99,9 +90,15 @@ export default function VerificationScreen({ navigation }) {
             key={index}
             style={styles.input}
             keyboardType="number-pad"
-            maxLength={1}
-            onChangeText={(text) => handleChangeText(text, index)} // Handle both typing and pasting
+            maxLength={6}
+            value={digit} // Bind the value to state
+            onChangeText={(text) => handleChangeText(text, index)}
             ref={(ref) => (inputRefs.current[index] = ref)}
+            onKeyPress={({ nativeEvent }) => {
+              if (nativeEvent.key === 'Backspace' && code[index] === '') {
+                inputRefs.current[index - 1]?.focus(); // Move focus to previous box on backspace
+              }
+            }}
           />
         ))}
       </View>
