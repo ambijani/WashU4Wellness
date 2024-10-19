@@ -1,10 +1,43 @@
 const mongoose = require('mongoose');
-const { User, Challenge} = require('./schema');
-const Team = require('./schema/Team');
+const { User, Challenge, Team } = require('./schema');
 
 const generateUsername = email => email.split('@')[0];
-const range = (start, end) => Array.from({ length: end - start + 1 }, (_, i) => start + i);
-
+const range = (start, end) => Array.from({ length: end - start + 1 }, (_, i) => (start + i).toString());
+const getAllTags = () => {
+  const yearOf = range(2020, 2025);
+    const major = [
+      'Computer Eng.',
+      'Computer Sci.',
+      'Software Eng.',
+      'Electrical Eng.',
+      'Mechanical Eng.',
+      'Civil Eng.',
+      'Biomedical Eng.',
+      'Data Science',
+      'Information Technology',
+      'Physics',
+      'Mathematics'
+    ];
+    const housing = [
+      'Bear Beginnings',
+      'Umrath House',
+      'Liggett House',
+      'Rubelmann Hall',
+      'Eliot House',
+      'Shanedling House',
+      'Dardick House',
+      'Thomas H. Eliot Residential College',
+      'Park/Mudd Residential College',
+      'Koenig Residential College',
+      'South 40 House',
+      'The Village',
+      'Millbrook Apartments',
+      'Lofts Apartments',
+      'off campus'
+    ];
+    const clubs = ['ACM', 'DBF', 'MSA', 'IEEE', 'WU Racing', ''];
+    const tags = { yearOf, major, housing, clubs };
+}
 const assignChallengesToNewUser = async userId => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -25,6 +58,8 @@ const assignChallengesToNewUser = async userId => {
 
     // Array to store challenges to be assigned
     const challengesToAssign = [];
+    const teamUpdates = [];
+    const challengeUpdates = [];
 
     // Check each challenge against user tags
     for (const challenge of activeChallenges) {
@@ -41,39 +76,48 @@ const assignChallengesToNewUser = async userId => {
             score: 0
           });
 
-          // Update or create team
-          await Team.findOneAndUpdate(
-            { teamTags: challengeTagSet },
-            {
-              $addToSet: { challenges: { challengeId: challenge._id, score: 0 } }
-            },
-            { upsert: true, new: true, session }
-          );
+          // Prepare team update
+          teamUpdates.push({
+            updateOne: {
+              filter: { teamTags: challengeTagSet },
+              update: { $addToSet: { challenges: { challengeId: challenge._id, score: 0 } } },
+              upsert: true
+            }
+          });
 
-          // Update challenge leaderboard
-          await Challenge.findByIdAndUpdate(
-            challenge._id,
-            {
-              $addToSet: {
-                'leaderboard.users': { userId: user._id, score: 0 },
-                'leaderboard.teams': { teamTags: challengeTagSet, score: 0 }
+          // Prepare challenge update
+          challengeUpdates.push({
+            updateOne: {
+              filter: { _id: challenge._id },
+              update: {
+                $addToSet: {
+                  'leaderboard.users': { userId: user._id, score: 0 },
+                  'leaderboard.teams': { teamTags: challengeTagSet, score: 0 }
+                }
               }
-            },
-            { session }
-          );
+            }
+          });
 
           break; // Move to next challenge once a match is found
         }
       }
     }
 
-    // Assign matched challenges to the user
+    // Perform bulk operations
     if (challengesToAssign.length > 0) {
       await User.findByIdAndUpdate(
         userId,
         { $push: { assignedChallenges: { $each: challengesToAssign } } },
         { session }
       );
+
+      if (teamUpdates.length > 0) {
+        await Team.bulkWrite(teamUpdates, { session });
+      }
+
+      if (challengeUpdates.length > 0) {
+        await Challenge.bulkWrite(challengeUpdates, { session });
+      }
     }
 
     await session.commitTransaction();
@@ -88,4 +132,4 @@ const assignChallengesToNewUser = async userId => {
   }
 };
 
-module.exports = { generateUsername, range, assignChallengesToNewUser };
+module.exports = { generateUsername, assignChallengesToNewUser, getAllTags };

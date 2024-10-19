@@ -10,9 +10,9 @@ app.use(cors());
 app.use(express.json()); // To parse JSON bodies
 
 // ------------- METHOD IMPORTS -------------
-const { sendVerificationEmail, verifyToken } = require('./emailService');  // Import functions from emailService.js
+const { sendVerificationEmail, verifyToken, updateUserTags } = require('./emailService');  // Import functions from emailService.js
 const { createChallenge } = require('./challengeService');
-const { range } = require('./helper');
+const { getAllTags } = require('./helper');
 
 // ------------- MONGO SETUP -------------
 const uri = 'mongodb+srv://alybijani:benchode@pakiboy.rbqbd.mongodb.net/?retryWrites=true&w=majority&appName=pakiboy';
@@ -24,7 +24,7 @@ mongoose.connect(uri)
     console.error('Error connecting to MongoDB Atlas: ', error);
   });
 
-// ------------- ROUTES -------------
+// ------------- USER ROUTES -------------
 
 // -- SEND VERIFICATION EMAIL --
 app.post('/send-verification', async (req, res) => {
@@ -53,8 +53,37 @@ app.post('/verify-token/:token', async (req, res) => {
   }
 });
 
+// -- UPDATE TAGS --
+app.post('/update-user-tags', async (req, res) => {
+  try {
+    const { email, tags } = req.body;
+    const updatedUser = await updateUserTags(email, tags);
+    res.status(200).json({ message: 'User tags updated successfully', user: updatedUser });
+  } catch (error) {
+    console.error('Error updating user tags:', error);
+    res.status(500).json({ message: 'Error updating user tags', error: error.message });
+  }
+});
 
-// -- HELPER FUNCTIONS --
+
+
+
+// ------------- CHALLENGE ROUTES -------------
+
+// -- CREATE CHALLENGE --
+app.post('/create-challenge', async (req, res) => {
+  try {
+    await createChallenge(req.body);
+    res.status(200).json({ message: ' Challenge made successfully.' });
+  } catch (error) {
+    console.error('Error creating challenge:', error);
+    res.status(500).json({ message: 'Error creating challenge', error: error.message });
+  }
+});
+
+
+
+// ------------- HELPER ROUTES -------------
 app.get('/get-all-activities', async (req, res) => {
   try {
     const activities = ['distance', 'steps', 'time', 'calories'];
@@ -68,64 +97,13 @@ app.get('/get-all-activities', async (req, res) => {
 
 app.get('/get-all-tag-choices', async (req, res) => {
   try {
-    const yearOf = range(2020, 2025);
-    const major = [
-      'Computer Eng.',
-      'Computer Sci.',
-      'Software Eng.',
-      'Electrical Eng.',
-      'Mechanical Eng.',
-      'Civil Eng.',
-      'Biomedical Eng.',
-      'Data Science',
-      'Information Technology',
-      'Physics',
-      'Mathematics'
-    ];
-    const housing = [
-      'Bear Beginnings',
-      'Umrath House',
-      'Liggett House',
-      'Rubelmann Hall',
-      'Eliot House',
-      'Shanedling House',
-      'Dardick House',
-      'Thomas H. Eliot Residential College',
-      'Park/Mudd Residential College',
-      'Koenig Residential College',
-      'South 40 House',
-      'The Village',
-      'Millbrook Apartments',
-      'Lofts Apartments',
-      'off campus'
-    ];
-    const clubs = ['ACM', 'DBF', 'MSA', 'IEEE', 'WU Racing', ''];
-    const tags = {
-      yearOf,
-      major,
-      housing,
-      clubs
-    }
+    tags = getAllTags();
     res.status(200).json(tags);
   } catch {
     console.error('Error in get-all-tag-choices:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 })
-
-
-// -- CREATE CHALLENGE --
-app.post('/create-challenge', async (req, res) => {
-  try {
-    await createChallenge(req.body);
-    res.status(200).json({ message: ' Challenge made successfully.'});
-  } catch (error) {
-    console.error('Error creating challenge:', error);
-    res.status(500).json({ message: 'Error creating challenge', error: error.message });
-  }
-});
-
-
 
 
 // Start the server

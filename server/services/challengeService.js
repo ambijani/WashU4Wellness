@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const { Challenge, User, Team } = require('./schemas');  // Ensure this path is correct
 
-// Updated challenge assignment logic
 const updateChallenge = async (challengeId, data) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -69,36 +68,38 @@ const assignUsersToChallenge = async (challenge, session) => {
       tags: { $elemMatch: { $all: teamTags } }
     }).session(session);
 
-    await User.updateMany(
-      { _id: { $in: users.map(user => user._id) } },
-      {
-        $push: {
-          assignedChallenges: {
-            challengeId: challenge._id,
-            assignedTags: teamTags,
-            score: 0
+    if (users.length > 0) {
+      await User.updateMany(
+        { _id: { $in: users.map(user => user._id) } },
+        {
+          $push: {
+            assignedChallenges: {
+              challengeId: challenge._id,
+              assignedTags: teamTags,
+              score: 0
+            }
           }
-        }
-      },
-      { session }
-    );
+        },
+        { session }
+      );
 
-    // Create or update team
-    await Team.findOneAndUpdate(
-      { teamTags: teamTags },
-      {
-        $setOnInsert: { teamTags: teamTags },
-        $push: {
-          challenges: {
-            challengeId: challenge._id,
-            score: 0
+      // Create or update team
+      await Team.findOneAndUpdate(
+        { teamTags: teamTags },
+        {
+          $setOnInsert: { teamTags: teamTags },
+          $push: {
+            challenges: {
+              challengeId: challenge._id,
+              score: 0
+            }
           }
-        }
-      },
-      { upsert: true, new: true, session }
-    );
+        },
+        { upsert: true, new: true, session }
+      );
 
-    assignedUsers += users.length;
+      assignedUsers += users.length;
+    }
   }
 
   return assignedUsers;

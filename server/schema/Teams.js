@@ -1,9 +1,8 @@
 const mongoose = require('mongoose');
 
-// Team Schema
 const teamSchema = new mongoose.Schema({
   teamTags: {
-    type: [mongoose.Schema.Types.Mixed],
+    type: [String],  // Changed to String for consistency
     required: true
   },
   challenges: [{
@@ -13,5 +12,4 @@ const teamSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const Team = mongoose.model('Team', teamSchema);
-
-module.exports = { Team };
+module.exports = Team;

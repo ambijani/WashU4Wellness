@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { Challenge, User } = require('./schemas');
+const { Challenge, User, Team } = require('./schemas');
 
 const updateUserScore = async (userId, challengeId, scoreIncrement) => {
   const session = await mongoose.startSession();
@@ -24,31 +24,27 @@ const updateUserScore = async (userId, challengeId, scoreIncrement) => {
     const teamIndex = challenge.teams.findIndex(team =>
       team.teamTags.every(tag => userChallenge.assignedTags.includes(tag))
     );
+
     if (teamIndex !== -1) {
       challenge.teams[teamIndex].score += scoreIncrement;
-      
-      // Update leaderboard
-      const userLeaderboardIndex = challenge.leaderboard.users.findIndex(u => u.userId.equals(userId));
-      if (userLeaderboardIndex !== -1) {
-        challenge.leaderboard.users[userLeaderboardIndex].score += scoreIncrement;
-      } else {
-        challenge.leaderboard.users.push({ userId, score: scoreIncrement });
-      }
-      challenge.leaderboard.users.sort((a, b) => b.score - a.score);
+     
+      // Update user leaderboard
+      await updateLeaderboard(challenge.leaderboard.users, userId, scoreIncrement);
 
-      const teamLeaderboardIndex = challenge.leaderboard.teams.findIndex(t => 
-        t.teamTags.every(tag => challenge.teams[teamIndex].teamTags.includes(tag)));
-      if (teamLeaderboardIndex !== -1) {
-        challenge.leaderboard.teams[teamLeaderboardIndex].score += scoreIncrement;
-      } else {
-        challenge.leaderboard.teams.push({ 
-          teamTags: challenge.teams[teamIndex].teamTags, 
-          score: challenge.teams[teamIndex].score 
-        });
-      }
-      challenge.leaderboard.teams.sort((a, b) => b.score - a.score);
+      // Update team leaderboard
+      await updateLeaderboard(challenge.leaderboard.teams, challenge.teams[teamIndex].teamTags, scoreIncrement, 'teamTags');
 
       await challenge.save({ session });
+
+      // Update Team document
+      await Team.findOneAndUpdate(
+        { teamTags: challenge.teams[teamIndex].teamTags },
+        { $inc: { [`challenges.$[elem].score`]: scoreIncrement } },
+        { 
+          arrayFilters: [{ "elem.challengeId": challengeId }],
+          session 
+        }
+      );
     }
 
     await session.commitTransaction();
@@ -59,6 +55,20 @@ const updateUserScore = async (userId, challengeId, scoreIncrement) => {
   } finally {
     session.endSession();
   }
+};
+
+const updateLeaderboard = async (leaderboard, id, scoreIncrement, idField = 'userId') => {
+  const index = leaderboard.findIndex(item => 
+    idField === 'userId' ? item[idField].equals(id) : item[idField].every(tag => id.includes(tag))
+  );
+
+  if (index !== -1) {
+    leaderboard[index].score += scoreIncrement;
+  } else {
+    leaderboard.push({ [idField]: id, score: scoreIncrement });
+  }
+
+  leaderboard.sort((a, b) => b.score - a.score);
 };
 
 const getTopUsersForChallenge = async (challengeId, limit = 10) => {

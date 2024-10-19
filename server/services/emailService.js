@@ -1,6 +1,6 @@
 const sgMail = require('@sendgrid/mail');
-const User = require('./schema/User');  // Import User model
-const { generateUsername } = require('./helper.js');
+const User = require('../schema/User.js');  // Import User model
+const { generateUsername } = require('../helper.js');
 
 // Set the SendGrid API key from your environment variables
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -73,4 +73,22 @@ const verifyToken = async (email, token) => {
   return user;
 };
 
-module.exports = { sendVerificationEmail, verifyToken };
+const updateUserTags = async (email, tags) => {
+  if (!email || !tags) {
+    return res.status(400).json({ message: 'Email and tags are required' });
+  }
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  user.tags = tags;
+  await user.save();
+
+  // Reassign challenges based on new tags
+  await assignChallengesToNewUser(user._id);
+
+  return user;
+};
+
+module.exports = { sendVerificationEmail, verifyToken, updateUserTags };

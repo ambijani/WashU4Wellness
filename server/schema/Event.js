@@ -9,7 +9,5 @@ const eventSchema = new mongoose.Schema({
   dateTimeLogged: { type: Date, default: Date.now }
 }, { timestamps: true });
 
-// Create a model
 const Event = mongoose.model('Event', eventSchema);
-
 module.exports = Event;
