@@ -1,4 +1,3 @@
-// screens/VerificationScreen.js
 import React, { useRef, useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, Button, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -22,20 +21,43 @@ export default function VerificationScreen({ navigation }) {
     getEmail();
   }, []);
 
-  // Function to handle text change for each input
-  const handleChange = (text, index) => {
-    const newCode = [...code];
-    newCode[index] = text;
+  // Handle changes for individual inputs and pasting
+  const handleChangeText = (text, index) => {
+    if (text.length > 1) {
+      // If a paste event occurs (text is more than one character)
+      handlePaste(text);
+    } else {
+      // Single character change, update state and move focus
+      const newCode = [...code];
+      newCode[index] = text;
+      setCode(newCode);
+
+      // Move focus to the next input when a digit is entered
+      if (text && index < 5) {
+        inputRefs.current[index + 1].focus();
+      }
+
+      // Move back if the input is cleared
+      if (!text && index > 0) {
+        inputRefs.current[index - 1].focus();
+      }
+    }
+  };
+
+  const handlePaste = (text) => {
+    const newCode = text.slice(0, 6).split(''); // Only consider the first 6 digits
     setCode(newCode);
 
-    // Move to the next input if there is a valid number
-    if (text && index < 5) {
-      inputRefs.current[index + 1].focus();
-    }
+    // Update the inputs and set the native props for each field
+    newCode.forEach((digit, i) => {
+      inputRefs.current[i].setNativeProps({ text: digit });
+    });
 
-    // If the user removes input, move back to the previous box
-    if (!text && index > 0) {
-      inputRefs.current[index - 1].focus();
+    // Focus on the last filled input field
+    if (newCode.length < 6) {
+      inputRefs.current[newCode.length].focus();
+    } else {
+      inputRefs.current[5].focus();
     }
   };
 
@@ -53,9 +75,8 @@ export default function VerificationScreen({ navigation }) {
         });
 
         if (response.ok) {
-          // Handle successful verification (you can navigate or show a success message)
           Alert.alert('Success', 'Code verified successfully!');
-          navigation.navigate('Activity'); // Navigate on successful verification
+          navigation.navigate('Home'); // Navigate on successful verification
         } else {
           const errorData = await response.json();
           Alert.alert('Error', errorData.message || 'Verification failed.');
@@ -79,8 +100,7 @@ export default function VerificationScreen({ navigation }) {
             style={styles.input}
             keyboardType="number-pad"
             maxLength={1}
-            value={digit}
-            onChangeText={(text) => handleChange(text, index)}
+            onChangeText={(text) => handleChangeText(text, index)} // Handle both typing and pasting
             ref={(ref) => (inputRefs.current[index] = ref)}
           />
         ))}
