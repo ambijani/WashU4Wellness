@@ -74,23 +74,27 @@ app.post('/send-verification', async (req, res) => {
 
 // -- VERIFY TOKEN --
 app.post('/verify-token/:token', async (req, res) => {
-  const token = req.params.token;
+  const { token } = req.params;
   const { email } = req.body;  
 
+  console.log('Token:', token);
+  console.log('Request body:', req.body);
+
   try {
-    console.log(email);
-    // Ensure email is provided
     if (!email) {
       return res.status(400).json({ message: 'Email is required for verification.' });
     }
 
-    // Verify the token using the verifyToken function
     const isValid = await verifyToken(email, token);
 
     if (isValid) {
       await User.findOneAndUpdate(
         { email },
-        { isVerified: true, twoFactorCode: null, twoFactorExpires: null }  // Mark the user as verified and clear the token
+        { 
+          isVerified: true, 
+          $unset: { twoFactorCode: "", twoFactorExpires: "" }
+        },
+        { new: true }
       );
       res.status(200).json({ message: 'Verification successful' });
     } else {
@@ -101,6 +105,12 @@ app.post('/verify-token/:token', async (req, res) => {
     res.status(500).json({ message: 'Error verifying token', error: error.message });
   }
 });
+
+
+
+
+
+
 
 // Start the server
 app.listen(port, () => {

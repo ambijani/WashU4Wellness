@@ -35,21 +35,13 @@ const sendVerificationEmail = async (email, token) => {
  */
 const verifyToken = async (email, token) => {
   try {
-    // Find the user by email
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ 
+      email, 
+      twoFactorCode: token,
+      twoFactorExpires: { $gt: Date.now() }
+    });
 
-    if (!user) {
-      console.error('User not found for email:', email);
-      return false;
-    }
-
-    // Check if the token matches and if it hasn't expired
-    if (user.twoFactorCode === token && Date.now() < user.twoFactorExpires) {
-      return true;
-    }
-
-    // If the token doesn't match or is expired, return false
-    return false;
+    return !!user; // Returns true if user is found, false otherwise
   } catch (error) {
     console.error('Error verifying token:', error);
     throw new Error('Error verifying token');
