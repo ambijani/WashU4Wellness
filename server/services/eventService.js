@@ -1,6 +1,6 @@
-const Event = require('./schema/Event'); // Import your Event model
-const User = require('./schema/User'); // Import your User model
-const { generateUsername } = require('./helper.js');
+const Event = require('../schema/Event'); // Import your Event model
+const User = require('../schema/User'); // Import your User model
+const { generateUsername } = require('../helper.js');
 
 // Function to log an event
 const logEvent = async (eventData) => {

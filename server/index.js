@@ -13,7 +13,7 @@ app.use(express.json()); // To parse JSON bodies
 const { sendVerificationEmail, verifyToken, updateUserTags } = require('./services/emailService');
 const { createChallenge, updateChallenge } = require('./services/challengeService');
 const { getAllTags } = require('./helper');
-const { logEvent } = require('./eventService');
+const { logEvent } = require('./services/eventService');
 
 // ------------- MONGO SETUP -------------
 const uri = 'mongodb+srv://alybijani:benchode@pakiboy.rbqbd.mongodb.net/?retryWrites=true&w=majority&appName=pakiboy';
@@ -126,9 +126,8 @@ app.post('/create-challenge', async (req, res) => {
   }
 });
 
+// -- EVENTS --
 
-
-// POST /log-event route to log a new event
 app.post('/log-event', async (req, res) => {
   try {
     const eventData = req.body.event; // Get event data from request body
