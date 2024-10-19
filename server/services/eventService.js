@@ -1,5 +1,5 @@
-const Event = require('../schema/Event'); // Import your Event model
-const User = require('../schema/User'); // Import your User model
+const Event = require('../schemas/Event'); // Import your Event model
+const User = require('../schemas/User'); // Import your User model
 const { generateUsername } = require('../helper.js');
 
 // Function to log an event
