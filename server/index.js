@@ -28,8 +28,9 @@ app.use(express.json()); // To parse JSON bodies
 
 // -- SEND VERIFICATION EMAIL --
 app.post('/send-verification', async (req, res) => {
+  const { email } = req.body;
   try {
-    await sendVerificationEmail(req.body);
+    await sendVerificationEmail(email);
     res.status(200).json({ message: 'Verification email sent successfully.' });
   } catch (error) {
     console.error('Error sending verification email:', error);
