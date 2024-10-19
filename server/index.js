@@ -34,28 +34,27 @@ app.post('/send-verification', async (req, res) => {
     if (!email) {
       return res.status(400).json({ message: 'Email is required' });
     }
-
-    const username = generateUsername(email);
     
-    // Validate generated username
-    if (!username) {
-      return res.status(400).json({ message: 'Failed to generate valid username from email' });
-    }
-
-    console.log(username);
+    const username = generateUsername(email);
     
     // Generate a 6-digit token
     const token = Math.floor(100000 + Math.random() * 900000).toString();
     
     // Update or create a user with the generated token
+    const updateData = {
+      twoFactorCode: token,
+      twoFactorExpires: Date.now() + 10 * 60 * 1000, // Token expires in 10 minutes
+      isVerified: false,
+    };
+
+    // Only set username if it's not null
+    if (username) {
+      updateData.$setOnInsert = { username };
+    }
+
     const user = await User.findOneAndUpdate(
       { email },
-      {
-        $setOnInsert: { username }, // Only set username if inserting a new document
-        twoFactorCode: token,
-        twoFactorExpires: Date.now() + 10 * 60 * 1000, // Token expires in 10 minutes
-        isVerified: false,
-      },
+      updateData,
       { new: true, upsert: true, setDefaultsOnInsert: true }
     );
 
@@ -65,7 +64,7 @@ app.post('/send-verification', async (req, res) => {
   } catch (error) {
     console.error('Error sending verification email:', error);
     if (error.code === 11000) {
-      res.status(409).json({ message: 'Email or username already exists.' });
+      res.status(409).json({ message: 'Email already exists.' });
     } else {
       res.status(500).json({ message: 'Failed to send verification email.' });
     }

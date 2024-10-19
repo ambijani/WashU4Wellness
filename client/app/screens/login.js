@@ -1,9 +1,33 @@
 // screens/LoginScreen.js
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
+
+  const handleLogin = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/send-verification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (response.ok) {
+        // Handle successful response (e.g., navigate to the verification screen)
+        navigation.navigate('Verification');
+      } else {
+        const errorData = await response.json();
+        console.log(errorData)
+        Alert.alert('Error', errorData.message || 'Something went wrong');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Unable to send verification. Please try again.');
+      console.error(error);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -15,7 +39,7 @@ export default function LoginScreen({ navigation }) {
         onChangeText={setEmail}
         keyboardType="email-address"
       />
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Verification')}>
+      <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
