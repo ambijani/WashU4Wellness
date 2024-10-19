@@ -1,5 +1,5 @@
 const sgMail = require('@sendgrid/mail');
-const User = require('../schemas/User.js');  // Import User model
+const User = require('../schemas/User');  // Import User model
 const { generateUsername, assignChallengesToNewUser } = require('../helper.js');
 const mongoose = require('mongoose'); 
 
@@ -28,6 +28,9 @@ const verifyToken = async (email, token) => {
   if (!user) {
     throw new Error('Invalid or expired token');
   }
+
+  // check if there are challenges to assign to this user
+  await assignChallengesToNewUser(user._id);
 
   return user;
 };

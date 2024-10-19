@@ -114,6 +114,20 @@ app.get('/get-all-tag-choices', async (req, res) => {
 })
 
 
+// -- CREATE CHALLENGE --
+app.post('/create-challenge', async (req, res) => {
+  try {
+    await createChallenge(req.body);
+    res.status(200).json({ message: ' Challenge made successfully.'});
+  } catch (error) {
+    console.error('Error creating challenge:', error);
+    res.status(500).json({ message: 'Error creating challenge', error: error.message });
+  }
+});
+
+
+
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
