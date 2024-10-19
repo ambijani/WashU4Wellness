@@ -24,7 +24,7 @@ function DrawerNavigator() {
 export default function App() {
   return (
     <NavigationContainer independent={true}>
-      <Stack.Navigator initialRouteName="Login">
+      <Stack.Navigator initialRouteName="Verification">
         {/* Drawer Navigator as a component */}
         <Stack.Screen name="Home" component={DrawerNavigator} options={{ headerShown: false }} />
         
