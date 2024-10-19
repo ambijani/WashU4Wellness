@@ -1,6 +1,6 @@
 const sgMail = require('@sendgrid/mail');
-const User = require('./schema/User');  // Import User model
-const { generateUsername, assignChallengesToNewUser } = require('./helper.js');
+const User = require('../schemas/User');  // Import User model
+const { generateUsername, assignChallengesToNewUser } = require('../helper.js');
 
 // Set the SendGrid API key from your environment variables
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
