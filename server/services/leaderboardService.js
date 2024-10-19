@@ -1,12 +1,13 @@
 const mongoose = require('mongoose');
-const { Challenge, User, Team } = require('./schemas');
+const { Challenge } = require('../schemas/Challenge'); 
+const { User } = require('../schemas/User');  
+const { Team } = require('../schemas/Team');  
 
-const updateUserScore = async (userId, challengeId, scoreIncrement) => {
+const updateUserScore = async (email, challengeId, scoreIncrement) => {
   const session = await mongoose.startSession();
   session.startTransaction();
-
   try {
-    const user = await User.findById(userId).session(session);
+    const user = await User.findOne({ email }).session(session);
     if (!user) throw new Error('User not found');
 
     const challenge = await Challenge.findById(challengeId).session(session);
@@ -29,7 +30,7 @@ const updateUserScore = async (userId, challengeId, scoreIncrement) => {
       challenge.teams[teamIndex].score += scoreIncrement;
      
       // Update user leaderboard
-      await updateLeaderboard(challenge.leaderboard.users, userId, scoreIncrement);
+      await updateLeaderboard(challenge.leaderboard.users, user._id, scoreIncrement);
 
       // Update team leaderboard
       await updateLeaderboard(challenge.leaderboard.teams, challenge.teams[teamIndex].teamTags, scoreIncrement, 'teamTags');
@@ -40,14 +41,15 @@ const updateUserScore = async (userId, challengeId, scoreIncrement) => {
       await Team.findOneAndUpdate(
         { teamTags: challenge.teams[teamIndex].teamTags },
         { $inc: { [`challenges.$[elem].score`]: scoreIncrement } },
-        { 
+        {
           arrayFilters: [{ "elem.challengeId": challengeId }],
-          session 
+          session
         }
       );
     }
 
     await session.commitTransaction();
+    return { message: 'Score updated successfully' };
   } catch (error) {
     await session.abortTransaction();
     console.error('Error in updateUserScore:', error);

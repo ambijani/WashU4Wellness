@@ -10,8 +10,8 @@ app.use(cors());
 app.use(express.json()); // To parse JSON bodies
 
 // ------------- METHOD IMPORTS -------------
-const { sendVerificationEmail, verifyToken, updateUserTags } = require('./emailService');  // Import functions from emailService.js
-const { createChallenge } = require('./challengeService');
+const { sendVerificationEmail, verifyToken, updateUserTags } = require('./services/emailService');
+const { createChallenge, updateChallenge } = require('./services/challengeService');
 const { getAllTags } = require('./helper');
 
 // ------------- MONGO SETUP -------------
@@ -73,15 +73,23 @@ app.post('/update-user-tags', async (req, res) => {
 // -- CREATE CHALLENGE --
 app.post('/create-challenge', async (req, res) => {
   try {
-    await createChallenge(req.body);
-    res.status(200).json({ message: ' Challenge made successfully.' });
+    const newChallenge = await createChallenge(req.body);
+    res.status(201).json({ message: 'Challenge created successfully', challenge: newChallenge });
   } catch (error) {
     console.error('Error creating challenge:', error);
     res.status(500).json({ message: 'Error creating challenge', error: error.message });
   }
 });
 
-
+app.put('/update-challenge/:challengeId', async (req, res) => {
+  try {
+    const updatedChallenge = await updateChallenge(req.params.challengeId, req.body);
+    res.status(200).json({ message: 'Challenge updated successfully', challenge: updatedChallenge });
+  } catch (error) {
+    console.error('Error updating challenge:', error);
+    res.status(500).json({ message: 'Error updating challenge', error: error.message });
+  }
+});
 
 // ------------- HELPER ROUTES -------------
 app.get('/get-all-activities', async (req, res) => {

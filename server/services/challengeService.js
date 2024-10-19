@@ -1,5 +1,38 @@
 const mongoose = require('mongoose');
-const { Challenge, User, Team } = require('./schemas');  // Ensure this path is correct
+const { Challenge } = require('../schemas/Challenge');
+const User = require('../schemas/User');
+const Team = require('../schemas/Team');
+
+const createChallenge = async (data) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const newChallenge = new Challenge({
+      challengeName: data.challengeName,
+      challengeType: data.challengeType,
+      challengeDescription: data.challengeDescription,
+      startDateTime: data.startDateTime,
+      endDateTime: data.endDateTime,
+      goalAmount: data.goalAmount,
+      challengeTags: data.challengeTags,
+      teams: data.challengeTags.map(tags => ({ teamTags: tags, score: 0 })),
+      leaderboard: { users: [], teams: [] }
+    });
+
+    await newChallenge.save({ session });
+    console.log(`New challenge created with id ${newChallenge.challengeId}`);
+    await updateUserAssignments(newChallenge, session);
+    await session.commitTransaction();
+    return newChallenge;
+  } catch (error) {
+    await session.abortTransaction();
+    console.error('Error in createChallenge:', error);
+    throw error;
+  } finally {
+    session.endSession();
+  }
+};
 
 const updateChallenge = async (challengeId, data) => {
   const session = await mongoose.startSession();
@@ -30,7 +63,6 @@ const updateChallenge = async (challengeId, data) => {
 
     console.log(`Challenge ${challengeId} updated successfully`);
     await updateUserAssignments(updatedChallenge, session);
-
     await session.commitTransaction();
     return updatedChallenge;
   } catch (error) {
@@ -105,4 +137,4 @@ const assignUsersToChallenge = async (challenge, session) => {
   return assignedUsers;
 };
 
-module.exports = { updateChallenge };
+module.exports = { createChallenge, updateChallenge };

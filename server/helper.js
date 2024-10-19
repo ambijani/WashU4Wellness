@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
-const { User, Challenge, Team } = require('./schema');
+const { Challenge } = require('./schemas/Challenge'); 
+const { User } = require('./schemas/User');  
+const { Team } = require('./schemas/Team'); 
 
 const generateUsername = email => email.split('@')[0];
 const range = (start, end) => Array.from({ length: end - start + 1 }, (_, i) => (start + i).toString());
