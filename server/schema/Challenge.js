@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-// Create a schema for the counter
+// Create a schema for the counter (unchanged)
 const counterSchema = new mongoose.Schema({
   _id: { type: String, required: true },
   seq: { type: Number, default: 0 }
@@ -8,7 +8,7 @@ const counterSchema = new mongoose.Schema({
 
 const Counter = mongoose.model('Counter', counterSchema);
 
-// Modify the Challenge schema
+// Updated Challenge schema
 const challengeSchema = new mongoose.Schema({
   challengeId: { type: Number, unique: true },
   challengeName: { type: String, required: true },
@@ -20,10 +20,24 @@ const challengeSchema = new mongoose.Schema({
   challengeTags: {
     type: [[mongoose.Schema.Types.Mixed]],
     default: []
+  },
+  teams: [{
+    teamTags: [mongoose.Schema.Types.Mixed],
+    score: { type: Number, default: 0 }
+  }],
+  leaderboard: {
+    users: [{
+      userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      score: Number
+    }],
+    teams: [{
+      teamTags: [mongoose.Schema.Types.Mixed],
+      score: Number
+    }]
   }
 }, { timestamps: true });
 
-// Add a pre-save hook to auto-increment challengeId
+// Add a pre-save hook to auto-increment challengeId (unchanged)
 challengeSchema.pre('save', function(next) {
   const doc = this;
   Counter.findByIdAndUpdate(
@@ -42,4 +56,5 @@ challengeSchema.pre('save', function(next) {
 
 // Create a model
 const Challenge = mongoose.model('Challenge', challengeSchema);
+
 module.exports = Challenge;

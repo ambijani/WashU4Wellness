@@ -1,9 +1,12 @@
-const Challenge = require('./schema/Challenge');
-const User = require('./schema/User');
+const mongoose = require('mongoose');
+const { Challenge, User, Team } = require('./schemas');  // Ensure this path is correct
 
+// Updated challenge assignment logic
 const updateChallenge = async (challengeId, data) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
-    // Find the challenge by challengeId and update it
     const updatedChallenge = await Challenge.findOneAndUpdate(
       { challengeId: challengeId },
       {
@@ -14,10 +17,12 @@ const updateChallenge = async (challengeId, data) => {
           startDateTime: data.startDateTime,
           endDateTime: data.endDateTime,
           goalAmount: data.goalAmount,
-          challengeTags: data.challengeTags
+          challengeTags: data.challengeTags,
+          teams: data.challengeTags.map(tags => ({ teamTags: tags, score: 0 })),
+          leaderboard: { users: [], teams: [] }
         }
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true, session }
     );
 
     if (!updatedChallenge) {
@@ -25,33 +30,30 @@ const updateChallenge = async (challengeId, data) => {
     }
 
     console.log(`Challenge ${challengeId} updated successfully`);
+    await updateUserAssignments(updatedChallenge, session);
 
-    // If challengeTags have changed, we might need to update user assignments
-    if (data.challengeTags) {
-      // This is a simplified version. You might want to implement more sophisticated logic
-      // to only update user assignments if the tags have actually changed.
-      await updateUserAssignments(updatedChallenge);
-    }
-
+    await session.commitTransaction();
     return updatedChallenge;
   } catch (error) {
+    await session.abortTransaction();
     console.error('Error in updateChallenge:', error);
     throw error;
+  } finally {
+    session.endSession();
   }
 };
 
-// Helper function to update user assignments
-const updateUserAssignments = async (challenge) => {
+const updateUserAssignments = async (challenge, session) => {
   try {
     // Remove the challenge from all users who were previously assigned
     await User.updateMany(
       { 'assignedChallenges.challengeId': challenge._id },
-      { $pull: { assignedChallenges: { challengeId: challenge._id } } }
+      { $pull: { assignedChallenges: { challengeId: challenge._id } } },
+      { session }
     );
 
     // Find and assign users based on new tags
-    const assignedUsers = await assignUsersToChallenge(challenge);
-
+    const assignedUsers = await assignUsersToChallenge(challenge, session);
     console.log(`Updated challenge assignment: ${assignedUsers} users in total`);
   } catch (error) {
     console.error('Error updating user assignments:', error);
@@ -59,14 +61,13 @@ const updateUserAssignments = async (challenge) => {
   }
 };
 
-// Helper function to assign users to a challenge
-const assignUsersToChallenge = async (challenge) => {
+const assignUsersToChallenge = async (challenge, session) => {
   let assignedUsers = 0;
 
   for (const teamTags of challenge.challengeTags) {
     const users = await User.find({
       tags: { $elemMatch: { $all: teamTags } }
-    });
+    }).session(session);
 
     await User.updateMany(
       { _id: { $in: users.map(user => user._id) } },
@@ -74,10 +75,27 @@ const assignUsersToChallenge = async (challenge) => {
         $push: {
           assignedChallenges: {
             challengeId: challenge._id,
-            assignedTags: teamTags
+            assignedTags: teamTags,
+            score: 0
           }
         }
-      }
+      },
+      { session }
+    );
+
+    // Create or update team
+    await Team.findOneAndUpdate(
+      { teamTags: teamTags },
+      {
+        $setOnInsert: { teamTags: teamTags },
+        $push: {
+          challenges: {
+            challengeId: challenge._id,
+            score: 0
+          }
+        }
+      },
+      { upsert: true, new: true, session }
     );
 
     assignedUsers += users.length;
