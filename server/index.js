@@ -15,7 +15,6 @@ mongoose.connect(uri)
   });
 
 // ------------- SCHEMAS -------------
-const User = require('./models/User');  // Adjust path based on your file structure
 
 // ------------- APP SETUP -------------
 const app = express();
