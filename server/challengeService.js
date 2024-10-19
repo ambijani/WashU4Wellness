@@ -84,4 +84,25 @@ const assignUsersToChallenge = async (challenge) => {
   return assignedUsers;
 };
 
-module.exports = { updateChallenge };
+const getUserChallenges = async (email) => {
+    try {
+      // Find the user by email and populate assigned challenges
+      const user = await User.findOne({ email }).populate('assignedChallenges.challengeId');
+      console.log(email);
+  
+      // If no user is found, throw an error
+      if (!user) {
+        throw new Error('User not found');
+      }
+  
+      // Return the user's assigned challenges
+      return {
+        assignedChallenges: user.assignedChallenges,
+      };
+    } catch (error) {
+      console.error('Error fetching user challenges:', error);
+      throw error;  // Re-throw the error to be handled by the caller
+    }
+  };
+
+module.exports = { updateChallenge, getUserChallenges };

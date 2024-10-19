@@ -11,7 +11,7 @@ app.use(express.json()); // To parse JSON bodies
 
 // ------------- METHOD IMPORTS -------------
 const { sendVerificationEmail, verifyToken } = require('./emailService');  // Import functions from emailService.js
-const { createChallenge } = require('./challengeService');
+const { updateChallenge, getUserChallenges } = require('./challengeService');
 const { range } = require('./helper');
 
 // ------------- MONGO SETUP -------------
@@ -117,7 +117,7 @@ app.get('/get-all-tag-choices', async (req, res) => {
 // -- CREATE CHALLENGE --
 app.post('/create-challenge', async (req, res) => {
   try {
-    await createChallenge(req.body);
+    await updateChallenge(req.body);
     res.status(200).json({ message: ' Challenge made successfully.'});
   } catch (error) {
     console.error('Error creating challenge:', error);
@@ -125,7 +125,25 @@ app.post('/create-challenge', async (req, res) => {
   }
 });
 
+app.get('/get-user-challenge', async (req, res) => {
+  try {
+    const email = req.body.email;  // Get email from the query parameters
+    console.log(email);
+    // Ensure that the email is provided
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
 
+    // Call the abstracted function to get user challenges
+    const userChallenges = await getUserChallenges(email);
+
+    // Send the user challenges as a response
+    res.status(200).json(userChallenges);
+  } catch (error) {
+    console.error('Error fetching user challenges:', error);
+    res.status(500).json({ message: 'Error fetching user challenges', error: error.message });
+  }
+});
 
 
 // Start the server

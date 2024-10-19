@@ -1,6 +1,6 @@
 const sgMail = require('@sendgrid/mail');
 const User = require('./schema/User');  // Import User model
-const { generateUsername } = require('./helper.js');
+const { generateUsername, assignChallengesToNewUser } = require('./helper.js');
 
 // Set the SendGrid API key from your environment variables
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -69,6 +69,9 @@ const verifyToken = async (email, token) => {
   if (!user) {
     throw new Error('Invalid or expired token');
   }
+
+  // check if there are challenges to assign to this user
+  await assignChallengesToNewUser(user._id);
 
   return user;
 };
