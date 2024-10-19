@@ -14,8 +14,6 @@ mongoose.connect(uri)
     console.error('Error connecting to MongoDB Atlas: ', error);
   });
 
-// ------------- SCHEMAS -------------
-
 // ------------- APP SETUP -------------
 const app = express();
 const port = 3000;

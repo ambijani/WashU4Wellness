@@ -1,6 +1,7 @@
 // screens/LoginScreen.js
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -16,11 +17,13 @@ export default function LoginScreen({ navigation }) {
       });
 
       if (response.ok) {
-        // Handle successful response (e.g., navigate to the verification screen)
+        // Store the email in AsyncStorage
+        await AsyncStorage.setItem('userEmail', email);
+        
+        // Navigate to the verification screen
         navigation.navigate('Verification');
       } else {
         const errorData = await response.json();
-        console.log(errorData)
         Alert.alert('Error', errorData.message || 'Something went wrong');
       }
     } catch (error) {

@@ -1,19 +1,12 @@
-// screens/SignupScreen.js
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 
 export default function SignupScreen({ navigation }) {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
 
   const handleSignup = () => {
-    // Handle signup logic
-    if (password !== confirmPassword) {
-      console.log('Passwords do not match');
-      return;
-    }
-    console.log('Signup:', { email, password });
+    // Handle signup logic without passwords
+    console.log('Signup:', { email });
   };
 
   return (
@@ -26,21 +19,7 @@ export default function SignupScreen({ navigation }) {
         onChangeText={setEmail}
         keyboardType="email-address"
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Confirm Password"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry
-      />
-      <TouchableOpacity style={styles.button} onPress={handleSignup}>
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Verification')}>
         <Text style={styles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => navigation.navigate('Login')}>
