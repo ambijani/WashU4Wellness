@@ -34,7 +34,7 @@ app.post('/send-verification', async (req, res) => {
   } catch (error) {
     console.error('Error sending verification email:', error);
     if (error.code === 11000) {
-      res.status(409).json({ message: 'Email or username already exists.' });
+      res.status(409).json({ message: 'Email already exists.' });
     } else {
       res.status(500).json({ message: 'Failed to send verification email.' });
     }
