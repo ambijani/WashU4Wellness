@@ -1,4 +1,4 @@
-function generateUsername(email) {
+const generateUsername = email => {
   return email.split('@')[0];
 }
 

@@ -1,18 +1,36 @@
 const sgMail = require('@sendgrid/mail');
 const User = require('./models/User');  // Import User model
+const { generateUsername } = require('./helper.js');
 
 // Set the SendGrid API key from your environment variables
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-/**
- * Sends the verification email using SendGrid.
- * @param {string} email - The user's email address.
- * @param {string} token - The generated 6-digit token.
- */
-const sendVerificationEmail = async (email, token) => {
+const sendVerificationEmail = async (email) => {
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
+  const username = generateUsername(email);
+  if (!username) {
+    throw new Error('Failed to generate valid username from email');
+  }
+
+  const token = Math.floor(100000 + Math.random() * 900000).toString();
+  
+  const user = await User.findOneAndUpdate(
+    { email },
+    {
+      $setOnInsert: { username },
+      twoFactorCode: token,
+      twoFactorExpires: Date.now() + 10 * 60 * 1000,
+      isVerified: false,
+    },
+    { new: true, upsert: true, setDefaultsOnInsert: true }
+  );
+
   const msg = {
-    to: email,  // Send email to the user's email address
-    from: 'washuwellnessdonotreply@gmail.com',  // Use a verified sender email
+    to: email,
+    from: 'washuwellnessdonotreply@gmail.com',
     subject: 'Your 2FA Verification Code',
     text: `Your verification code is: ${token}`,
     html: `<strong>Your verification code is: ${token}</strong>`,
@@ -25,27 +43,34 @@ const sendVerificationEmail = async (email, token) => {
     console.error('Error sending email:', error.response ? error.response.body : error);
     throw new Error('Failed to send verification email');
   }
+
+  return user;
 };
 
-/**
- * Verifies the provided token against the token stored in the database.
- * @param {string} email - The user's email address.
- * @param {string} token - The token entered by the user.
- * @returns {boolean} - Returns true if the token is valid, false otherwise.
- */
+
 const verifyToken = async (email, token) => {
-  try {
-    const user = await User.findOne({ 
+  if (!email || !token) {
+    throw new Error('Email and token are required for verification.');
+  }
+
+  const user = await User.findOneAndUpdate(
+    { 
       email, 
       twoFactorCode: token,
       twoFactorExpires: { $gt: Date.now() }
-    });
+    },
+    { 
+      isVerified: true, 
+      $unset: { twoFactorCode: "", twoFactorExpires: "" }
+    },
+    { new: true }
+  );
 
-    return !!user; // Returns true if user is found, false otherwise
-  } catch (error) {
-    console.error('Error verifying token:', error);
-    throw new Error('Error verifying token');
+  if (!user) {
+    throw new Error('Invalid or expired token');
   }
+
+  return user;
 };
 
 module.exports = { sendVerificationEmail, verifyToken };

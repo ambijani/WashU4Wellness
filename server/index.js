@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const { sendVerificationEmail, verifyToken } = require('./emailService');  // Import functions from emailService.js
-const { generateUsername } = require('./helper.js');
+
 // ------------- MONGO SETUP -------------
 const uri = 'mongodb+srv://alybijani:benchode@pakiboy.rbqbd.mongodb.net/?retryWrites=true&w=majority&appName=pakiboy';
 mongoose.connect(uri)
@@ -28,39 +28,8 @@ app.use(express.json()); // To parse JSON bodies
 
 // -- SEND VERIFICATION EMAIL --
 app.post('/send-verification', async (req, res) => {
-  const { email } = req.body;
   try {
-    // Validate email
-    if (!email) {
-      return res.status(400).json({ message: 'Email is required' });
-    }
-
-    const username = generateUsername(email);
-    
-    // Validate generated username
-    if (!username) {
-      return res.status(400).json({ message: 'Failed to generate valid username from email' });
-    }
-
-    console.log(username);
-    
-    // Generate a 6-digit token
-    const token = Math.floor(100000 + Math.random() * 900000).toString();
-    
-    // Update or create a user with the generated token
-    const user = await User.findOneAndUpdate(
-      { email },
-      {
-        $setOnInsert: { username }, // Only set username if inserting a new document
-        twoFactorCode: token,
-        twoFactorExpires: Date.now() + 10 * 60 * 1000, // Token expires in 10 minutes
-        isVerified: false,
-      },
-      { new: true, upsert: true, setDefaultsOnInsert: true }
-    );
-
-    // Send the verification email
-    await sendVerificationEmail(user.email, token);
+    await sendVerificationEmail(req.body);
     res.status(200).json({ message: 'Verification email sent successfully.' });
   } catch (error) {
     console.error('Error sending verification email:', error);
@@ -74,39 +43,17 @@ app.post('/send-verification', async (req, res) => {
 
 // -- VERIFY TOKEN --
 app.post('/verify-token/:token', async (req, res) => {
-  const { token } = req.params;
-  const { email } = req.body;  
-
-  console.log('Token:', token);
-  console.log('Request body:', req.body);
-
   try {
-    if (!email) {
-      return res.status(400).json({ message: 'Email is required for verification.' });
-    }
-
-    const isValid = await verifyToken(email, token);
-
-    if (isValid) {
-      await User.findOneAndUpdate(
-        { email },
-        { 
-          isVerified: true, 
-          $unset: { twoFactorCode: "", twoFactorExpires: "" }
-        },
-        { new: true }
-      );
-      res.status(200).json({ message: 'Verification successful' });
-    } else {
-      res.status(400).json({ message: 'Invalid or expired token' });
-    }
+    await verifyToken(req.body.email, req.params.token);
+    res.status(200).json({ message: 'Verification successful' });
   } catch (error) {
     console.error('Error verifying token:', error);
-    res.status(500).json({ message: 'Error verifying token', error: error.message });
+    res.status(error.message.includes('required') ? 400 : 401).json({ message: error.message });
   }
 });
 
 
+// -- GET: fitness data --
 
 
 
