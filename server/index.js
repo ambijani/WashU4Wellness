@@ -10,9 +10,9 @@ app.use(cors());
 app.use(express.json()); // To parse JSON bodies
 
 // ------------- METHOD IMPORTS -------------
-const { sendVerificationEmail, verifyToken } = require('./emailService');  // Import functions from emailService.js
-const { updateChallenge, getUserChallenges } = require('./challengeService');
-const { range } = require('./helper');
+const { sendVerificationEmail, verifyToken, updateUserTags } = require('./services/emailService');
+const { createChallenge, updateChallenge } = require('./services/challengeService');
+const { getAllTags } = require('./helper');
 const { logEvent } = require('./eventService');
 
 // ------------- MONGO SETUP -------------
@@ -25,7 +25,7 @@ mongoose.connect(uri)
     console.error('Error connecting to MongoDB Atlas: ', error);
   });
 
-// ------------- ROUTES -------------
+// ------------- USER ROUTES -------------
 
 // -- SEND VERIFICATION EMAIL --
 app.post('/send-verification', async (req, res) => {
@@ -54,8 +54,45 @@ app.post('/verify-token/:token', async (req, res) => {
   }
 });
 
+// -- UPDATE TAGS --
+app.post('/update-user-tags', async (req, res) => {
+  try {
+    const { email, tags } = req.body;
+    const updatedUser = await updateUserTags(email, tags);
+    res.status(200).json({ message: 'User tags updated successfully', user: updatedUser });
+  } catch (error) {
+    console.error('Error updating user tags:', error);
+    res.status(500).json({ message: 'Error updating user tags', error: error.message });
+  }
+});
 
-// -- HELPER FUNCTIONS --
+
+
+
+// ------------- CHALLENGE ROUTES -------------
+
+// -- CREATE CHALLENGE --
+app.post('/create-challenge', async (req, res) => {
+  try {
+    const newChallenge = await createChallenge(req.body);
+    res.status(201).json({ message: 'Challenge created successfully', challenge: newChallenge });
+  } catch (error) {
+    console.error('Error creating challenge:', error);
+    res.status(500).json({ message: 'Error creating challenge', error: error.message });
+  }
+});
+
+app.put('/update-challenge/:challengeId', async (req, res) => {
+  try {
+    const updatedChallenge = await updateChallenge(req.params.challengeId, req.body);
+    res.status(200).json({ message: 'Challenge updated successfully', challenge: updatedChallenge });
+  } catch (error) {
+    console.error('Error updating challenge:', error);
+    res.status(500).json({ message: 'Error updating challenge', error: error.message });
+  }
+});
+
+// ------------- HELPER ROUTES -------------
 app.get('/get-all-activities', async (req, res) => {
   try {
     const activities = ['distance', 'steps', 'time', 'calories'];
@@ -69,44 +106,7 @@ app.get('/get-all-activities', async (req, res) => {
 
 app.get('/get-all-tag-choices', async (req, res) => {
   try {
-    const yearOf = range(2020, 2025);
-    const major = [
-      'Computer Eng.',
-      'Computer Sci.',
-      'Software Eng.',
-      'Electrical Eng.',
-      'Mechanical Eng.',
-      'Civil Eng.',
-      'Biomedical Eng.',
-      'Data Science',
-      'Information Technology',
-      'Physics',
-      'Mathematics'
-    ];
-    const housing = [
-      'Bear Beginnings',
-      'Umrath House',
-      'Liggett House',
-      'Rubelmann Hall',
-      'Eliot House',
-      'Shanedling House',
-      'Dardick House',
-      'Thomas H. Eliot Residential College',
-      'Park/Mudd Residential College',
-      'Koenig Residential College',
-      'South 40 House',
-      'The Village',
-      'Millbrook Apartments',
-      'Lofts Apartments',
-      'off campus'
-    ];
-    const clubs = ['ACM', 'DBF', 'MSA', 'IEEE', 'WU Racing', ''];
-    const tags = {
-      yearOf,
-      major,
-      housing,
-      clubs
-    }
+    tags = getAllTags();
     res.status(200).json(tags);
   } catch {
     console.error('Error in get-all-tag-choices:', error);
@@ -118,7 +118,7 @@ app.get('/get-all-tag-choices', async (req, res) => {
 // -- CHALLENGES --
 app.post('/create-challenge', async (req, res) => {
   try {
-    await updateChallenge(req.body);
+    await createChallenge(req.body);
     res.status(200).json({ message: ' Challenge made successfully.'});
   } catch (error) {
     console.error('Error creating challenge:', error);
@@ -126,25 +126,7 @@ app.post('/create-challenge', async (req, res) => {
   }
 });
 
-app.get('/get-user-challenge', async (req, res) => {
-  try {
-    const email = req.body.email;  // Get email from the query parameters
-    console.log(email);
-    // Ensure that the email is provided
-    if (!email) {
-      return res.status(400).json({ message: 'Email is required' });
-    }
 
-    // Call the abstracted function to get user challenges
-    const userChallenges = await getUserChallenges(email);
-
-    // Send the user challenges as a response
-    res.status(200).json(userChallenges);
-  } catch (error) {
-    console.error('Error fetching user challenges:', error);
-    res.status(500).json({ message: 'Error fetching user challenges', error: error.message });
-  }
-});
 
 // POST /log-event route to log a new event
 app.post('/log-event', async (req, res) => {
