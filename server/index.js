@@ -14,9 +14,6 @@ mongoose.connect(uri)
     console.error('Error connecting to MongoDB Atlas: ', error);
   });
 
-// ------------- SCHEMAS -------------
-const User = require('./models/User');  // Adjust path based on your file structure
-
 // ------------- APP SETUP -------------
 const app = express();
 const port = 3000;
