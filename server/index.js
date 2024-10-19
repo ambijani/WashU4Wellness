@@ -2,7 +2,17 @@ require('dotenv').config();  // Load environment variables
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+
+// ------------- APP SETUP -------------
+const app = express();
+const port = 3000;
+app.use(cors());
+app.use(express.json()); // To parse JSON bodies
+
+// ------------- METHOD IMPORTS -------------
 const { sendVerificationEmail, verifyToken } = require('./emailService');  // Import functions from emailService.js
+const { createChallenge } = require('./challengeService');
+const { range } = require('./helper');
 
 // ------------- MONGO SETUP -------------
 const uri = 'mongodb+srv://alybijani:benchode@pakiboy.rbqbd.mongodb.net/?retryWrites=true&w=majority&appName=pakiboy';
@@ -13,13 +23,6 @@ mongoose.connect(uri)
   .catch((error) => {
     console.error('Error connecting to MongoDB Atlas: ', error);
   });
-
-// ------------- APP SETUP -------------
-const app = express();
-const port = 3000;
-
-app.use(cors());
-app.use(express.json()); // To parse JSON bodies
 
 // ------------- ROUTES -------------
 
@@ -51,8 +54,76 @@ app.post('/verify-token/:token', async (req, res) => {
 });
 
 
-// -- GET: fitness data --
+// -- HELPER FUNCTIONS --
+app.get('/get-all-activities', async (req, res) => {
+  try {
+    const activities = ['distance', 'steps', 'time', 'calories'];
 
+    res.status(200).json(activities);
+  } catch (error) {
+    console.error('Error fetching activities:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+app.get('/get-all-tag-choices', async (req, res) => {
+  try {
+    const yearOf = range(2020, 2025);
+    const major = [
+      'Computer Eng.',
+      'Computer Sci.',
+      'Software Eng.',
+      'Electrical Eng.',
+      'Mechanical Eng.',
+      'Civil Eng.',
+      'Biomedical Eng.',
+      'Data Science',
+      'Information Technology',
+      'Physics',
+      'Mathematics'
+    ];
+    const housing = [
+      'Bear Beginnings',
+      'Umrath House',
+      'Liggett House',
+      'Rubelmann Hall',
+      'Eliot House',
+      'Shanedling House',
+      'Dardick House',
+      'Thomas H. Eliot Residential College',
+      'Park/Mudd Residential College',
+      'Koenig Residential College',
+      'South 40 House',
+      'The Village',
+      'Millbrook Apartments',
+      'Lofts Apartments',
+      'off campus'
+    ];
+    const clubs = ['ACM', 'DBF', 'MSA', 'IEEE', 'WU Racing', ''];
+    const tags = {
+      yearOf,
+      major,
+      housing,
+      clubs
+    }
+    res.status(200).json(tags);
+  } catch {
+    console.error('Error in get-all-tag-choices:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+})
+
+
+// -- CREATE CHALLENGE --
+app.post('/create-challenge', async (req, res) => {
+  try {
+    await createChallenge(req.body);
+    res.status(200).json({ message: ' Challenge made successfully.'});
+  } catch (error) {
+    console.error('Error creating challenge:', error);
+    res.status(500).json({ message: 'Error creating challenge', error: error.message });
+  }
+});
 
 
 

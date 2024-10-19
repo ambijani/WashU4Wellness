@@ -7,10 +7,16 @@ const userSchema = new mongoose.Schema({
   twoFactorCode: { type: String },
   twoFactorExpires: { type: Date },
   isVerified: { type: Boolean, default: false },
-  // Add other fields as needed
+  assignedChallenges: [{
+    challengeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Challenge' },
+    assignedTags: [String]
+  }],
+  tags: {
+    type: [[mongoose.Schema.Types.Mixed]],
+    default: []
+  }
 }, { timestamps: true });
 
 // Create a model
 const User = mongoose.model('User', userSchema);
-
 module.exports = User;
