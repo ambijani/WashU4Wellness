@@ -13,6 +13,7 @@ app.use(express.json()); // To parse JSON bodies
 const { sendVerificationEmail, verifyToken } = require('./emailService');  // Import functions from emailService.js
 const { updateChallenge, getUserChallenges } = require('./challengeService');
 const { range } = require('./helper');
+const { logEvent } = require('./eventService');
 
 // ------------- MONGO SETUP -------------
 const uri = 'mongodb+srv://alybijani:benchode@pakiboy.rbqbd.mongodb.net/?retryWrites=true&w=majority&appName=pakiboy';
@@ -114,7 +115,7 @@ app.get('/get-all-tag-choices', async (req, res) => {
 })
 
 
-// -- CREATE CHALLENGE --
+// -- CHALLENGES --
 app.post('/create-challenge', async (req, res) => {
   try {
     await updateChallenge(req.body);
@@ -145,6 +146,24 @@ app.get('/get-user-challenge', async (req, res) => {
   }
 });
 
+// POST /log-event route to log a new event
+app.post('/log-event', async (req, res) => {
+  try {
+    const eventData = req.body.event; // Get event data from request body
+
+    // Call the logEvent function
+    const savedEvent = await logEvent(eventData);
+
+    // Respond with the saved event
+    res.status(201).json({
+      message: 'Event logged successfully.',
+      event: savedEvent
+    });
+  } catch (error) {
+    console.error('Error logging event:', error);
+    res.status(500).json({ message: 'Error logging event', error: error.message });
+  }
+});
 
 // Start the server
 app.listen(port, () => {
