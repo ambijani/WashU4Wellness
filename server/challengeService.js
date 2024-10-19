@@ -26,10 +26,8 @@ const updateChallenge = async (challengeId, data) => {
 
     console.log(`Challenge ${challengeId} updated successfully`);
 
-    // If challengeTags have changed, we might need to update user assignments
+    //  If challengeTags have changed, we might need to update user assignments
     if (data.challengeTags) {
-      // This is a simplified version. You might want to implement more sophisticated logic
-      // to only update user assignments if the tags have actually changed.
       await updateUserAssignments(updatedChallenge);
     }
 
