@@ -39,7 +39,7 @@ const getAllTags = () => {
     'Lofts Apartments',
     'off campus'
   ];
-  const clubs = ['ACM', 'DBF', 'MSA', 'IEEE', 'WU Racing', ''];
+  const clubs = ['ACM', 'DBF', 'MSA', 'IEEE', 'WU Racing'];
   return { yearOf, major, housing, clubs };
 };
 
