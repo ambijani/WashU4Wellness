@@ -1,12 +1,26 @@
-// VerificationScreen.js
-import React, { useRef, useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Button } from 'react-native';
+// screens/VerificationScreen.js
+import React, { useRef, useState, useEffect } from 'react';
+import { View, Text, TextInput, StyleSheet, Button, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function VerificationScreen({ navigation }) {
   const [code, setCode] = useState(['', '', '', '', '', '']); // 6 digits state
+  const [email, setEmail] = useState(''); // To store the email from AsyncStorage
 
   // Create refs for each input box
   const inputRefs = useRef([]);
+
+  // Get email from local storage on component mount
+  useEffect(() => {
+    const getEmail = async () => {
+      const storedEmail = await AsyncStorage.getItem('userEmail');
+      if (storedEmail) {
+        setEmail(storedEmail);
+      }
+    };
+
+    getEmail();
+  }, []);
 
   // Function to handle text change for each input
   const handleChange = (text, index) => {
@@ -25,14 +39,33 @@ export default function VerificationScreen({ navigation }) {
     }
   };
 
-  const handleVerify = () => {
+  const handleVerify = async () => {
     const verificationCode = code.join('');
+    
     if (verificationCode.length === 6) {
-      // You can add further validation or API call for verification here
-      alert(`Code verified: ${verificationCode}`);
-      navigation.navigate('Activity'); // Navigate on successful verification
+      try {
+        const response = await fetch(`http://localhost:3000/verify-token/${verificationCode}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email }),
+        });
+
+        if (response.ok) {
+          // Handle successful verification (you can navigate or show a success message)
+          Alert.alert('Success', 'Code verified successfully!');
+          navigation.navigate('Activity'); // Navigate on successful verification
+        } else {
+          const errorData = await response.json();
+          Alert.alert('Error', errorData.message || 'Verification failed.');
+        }
+      } catch (error) {
+        Alert.alert('Error', 'Unable to verify the code. Please try again.');
+        console.error(error);
+      }
     } else {
-      alert('Please enter a valid 6-digit code.');
+      Alert.alert('Invalid Code', 'Please enter a valid 6-digit code.');
     }
   };
 
@@ -48,7 +81,7 @@ export default function VerificationScreen({ navigation }) {
             maxLength={1}
             value={digit}
             onChangeText={(text) => handleChange(text, index)}
-            ref={(ref) => inputRefs.current[index] = ref}
+            ref={(ref) => (inputRefs.current[index] = ref)}
           />
         ))}
       </View>
