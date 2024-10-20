@@ -192,9 +192,9 @@ app.post('/get-user-challenges', async (req, res) => {
 
 app.post('/get-single-challenge/:challengeID', async (req, res) => {
   try {
-    const { challengeID } = req.params;
+    const { challengeID: rawID } = req.params;
     const { email } = req.body;
-
+    const challengeID = parseInt(rawID);
     if (!email) {
       return res.status(400).json({ message: 'Email is required in the request body' });
     }
