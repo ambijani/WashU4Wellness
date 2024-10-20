@@ -6,7 +6,7 @@ const Team = require('../schemas/Team');
 const createChallenge = async (data) => {
   const session = await mongoose.startSession();
   session.startTransaction();
-  data.goalAmount = parseInt(data.goalAmount);
+  let goalValue = parseInt(data.goalAmount);
   try {
     const newChallenge = new Challenge({
       challengeName: data.challengeName,
@@ -14,7 +14,7 @@ const createChallenge = async (data) => {
       challengeDescription: data.challengeDescription,
       startDateTime: data.startDateTime,
       endDateTime: data.endDateTime,
-      goalAmount: data.goalAmount,
+      goalAmount: goalValue,
       challengeTags: data.challengeTags,
       teams: data.challengeTags.map(tags => ({ teamTags: tags, score: 0 })),
       leaderboard: { users: [], teams: [] }

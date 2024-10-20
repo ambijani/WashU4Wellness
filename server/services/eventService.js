@@ -11,8 +11,9 @@ const logEvent = async (eventData) => {
   session.startTransaction();
 
   try {
-    const { email, eventName, activityType, value, dateTimeLogged } = eventData;
-    value = parseInt(value);
+    const { email, eventName, activityType, value: rawValue, dateTimeLogged } = eventData;
+    let value = parseInt(rawValue);
+
     if (!email || !eventName || !activityType || !value) {
       throw new Error('Missing required fields');
     }
@@ -62,8 +63,8 @@ const logEvent = async (eventData) => {
   }
 };
 
-const updateChallengeAndTeamScores = async (challenge, user, scoreIncrement, session) => {
-  scoreIncrement = parseInt(scoreIncrement);
+const updateChallengeAndTeamScores = async (challenge, user, _scoreIncrement, session) => {
+  scoreIncrement = parseInt(_scoreIncrement);
   // Update user's score in the challenge leaderboard
   const userLeaderboardIndex = challenge.leaderboard.users.findIndex(u => u.userId.equals(user._id));
   if (userLeaderboardIndex !== -1) {
