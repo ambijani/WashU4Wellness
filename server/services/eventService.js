@@ -12,7 +12,7 @@ const logEvent = async (eventData) => {
 
   try {
     const { email, eventName, activityType, value, dateTimeLogged } = eventData;
-
+    value = parseInt(value);
     if (!email || !eventName || !activityType || !value) {
       throw new Error('Missing required fields');
     }
