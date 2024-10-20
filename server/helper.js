@@ -149,4 +149,26 @@ const assignChallengesToNewUser = async (email) => {
   }
 };
 
-module.exports = { generateUsername, assignChallengesToNewUser, getAllTags };
+// Function to get user goal info
+const getUserGoalInfo = async (email) => {
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new Error('User not found');
+  }
+  return { goalType: user.goalType, goalValue: user.goalValue };
+};
+
+// Function to update user goal info
+const updateUserGoalInfo = async (email, goalType, goalValue) => {
+  const user = await User.findOneAndUpdate(
+    { email },
+    { $set: { goalType, goalValue } },
+    { new: true }
+  );
+  if (!user) {
+    throw new Error('User not found');
+  }
+  return { goalType: user.goalType, goalValue: user.goalValue };
+};
+
+module.exports = { generateUsername, assignChallengesToNewUser, getAllTags, getUserGoalInfo, updateUserGoalInfo };

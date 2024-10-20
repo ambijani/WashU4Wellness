@@ -12,7 +12,7 @@ app.use(express.json()); // To parse JSON bodies
 // ------------- METHOD IMPORTS -------------
 const { sendVerificationEmail, verifyToken, updateUserTags, getUserTags } = require('./services/emailService');
 const { createChallenge, updateChallenge, fetchUserChallengesByEmail } = require('./services/challengeService');
-const { getAllTags } = require('./helper');
+const { getAllTags, getUserGoalInfo, updateUserGoalInfo } = require('./helper');
 const { logEvent, fetchUserLoggedEvents  } = require('./services/eventService');
 const { getAllSingleChallengeInfo } = require('./services/leaderboardService');
 // ------------- MONGO SETUP -------------
@@ -81,6 +81,45 @@ app.post('/get-user-tags', async (req, res) => {
       res.status(404).json({ message: 'User not found', error: error.message });
     } else {
       res.status(500).json({ message: 'Error retrieving user tags', error: error.message });
+    }
+  }
+});
+
+// ------------- USER GOAL INFO -------------
+// Route to get user goal info
+app.post('/get-user-goal-info', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+    const goalInfo = await getUserGoalInfo(email);
+    res.status(200).json({ message: 'User goal info retrieved successfully', goalInfo });
+  } catch (error) {
+    console.error('Error retrieving user goal info:', error);
+    if (error.message === 'User not found') {
+      res.status(404).json({ message: 'User not found' });
+    } else {
+      res.status(500).json({ message: 'Error retrieving user goal info', error: error.message });
+    }
+  }
+});
+
+// Route to update user goal info
+app.post('/update-user-goal-info', async (req, res) => {
+  try {
+    const { email, goalType, goalValue } = req.body;
+    if (!email || !goalType || goalValue === undefined) {
+      return res.status(400).json({ message: 'Email, goalType, and goalValue are required' });
+    }
+    const updatedGoalInfo = await updateUserGoalInfo(email, goalType, goalValue);
+    res.status(200).json({ message: 'User goal info updated successfully', goalInfo: updatedGoalInfo });
+  } catch (error) {
+    console.error('Error updating user goal info:', error);
+    if (error.message === 'User not found') {
+      res.status(404).json({ message: 'User not found' });
+    } else {
+      res.status(500).json({ message: 'Error updating user goal info', error: error.message });
     }
   }
 });

@@ -7,6 +7,8 @@ const userSchema = new mongoose.Schema({
   twoFactorExpires: { type: Date },
   isVerified: { type: Boolean, default: false },
   isAdmin: { type: Boolean, default: false },
+  goalValue: { type: Number, default: 0 },
+  goalType: { type: String },
   tags: {
     type: [[String]],  // Changed to String for consistency
     default: []
