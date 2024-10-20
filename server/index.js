@@ -112,6 +112,7 @@ app.post('/update-user-goal-info', async (req, res) => {
     if (!email || !goalType || goalValue === undefined) {
       return res.status(400).json({ message: 'Email, goalType, and goalValue are required' });
     }
+    goalValue = parseInt(goalValue);
     const updatedGoalInfo = await updateUserGoalInfo(email, goalType, goalValue);
     res.status(200).json({ message: 'User goal info updated successfully', goalInfo: updatedGoalInfo });
   } catch (error) {
