@@ -89,44 +89,6 @@ app.put('/update-challenge/:challengeId', async (req, res) => {
   }
 });
 
-// TODO _MY: GET USER PROGRESS, HIS TEAMS. TOP TEAMS AND TOP USERS !!!
-// app.get('/get-single-challenge', async (req, res) => {
-
-// });
-// ------------- HELPER ROUTES -------------
-app.get('/get-all-activities', async (req, res) => {
-  try {
-    const activities = ['distance', 'steps', 'time', 'calories'];
-
-    res.status(200).json(activities);
-  } catch (error) {
-    console.error('Error fetching activities:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-app.get('/get-all-tag-choices', async (req, res) => {
-  try {
-    tags = getAllTags();
-    res.status(200).json(tags);
-  } catch {
-    console.error('Error in get-all-tag-choices:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-})
-
-
-// -- CHALLENGES --
-app.post('/create-challenge', async (req, res) => {
-  try {
-    await createChallenge(req.body);
-    res.status(200).json({ message: ' Challenge made successfully.'});
-  } catch (error) {
-    console.error('Error creating challenge:', error);
-    res.status(500).json({ message: 'Error creating challenge', error: error.message });
-  }
-});
-
 app.post('/get-user-challenges', async (req, res) => {
   try {
     const { email } = req.body; // Use query parameters for GET requests
@@ -150,22 +112,7 @@ app.post('/get-user-challenges', async (req, res) => {
   }
 });
 
-app.get('/get-all-challenges', async (req, res) => {
-  try {
-    // Fetch all challenges using the service method
-    const challenges = await fetchAllChallenges();
-
-    // Respond with the challenges
-    res.status(200).json({
-      message: 'All challenges retrieved successfully',
-      challenges: challenges
-    });
-  } catch (error) {
-    console.error('Error fetching all challenges:', error);
-    res.status(500).json({ message: 'Error fetching all challenges', error: error.message });
-  }
-});
-
+// TODO _MY: GET USER PROGRESS, HIS TEAMS. TOP TEAMS AND TOP USERS !!!
 // TODO: Add a route to get a single challenge by its challengeID
 // // Route to get a single challenge by its challengeID
 // app.get('/get-single-challenge/:challengeID', async (req, res) => {
@@ -186,7 +133,50 @@ app.get('/get-all-challenges', async (req, res) => {
 //   }
 // });
 
-// -- EVENTS --
+
+// ------------- HELPER ROUTES -------------
+app.get('/get-all-activities', async (req, res) => {
+  try {
+    const activities = ['distance', 'steps', 'time', 'calories'];
+
+    res.status(200).json(activities);
+  } catch (error) {
+    console.error('Error fetching activities:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+app.get('/get-all-tag-choices', async (req, res) => {
+  try {
+    tags = getAllTags();
+    res.status(200).json(tags);
+  } catch {
+    console.error('Error in get-all-tag-choices:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+})
+
+
+// ------------- ADMIN GET ALL CHALLENGES -------------
+app.get('/get-all-challenges', async (req, res) => {
+  try {
+    // Fetch all challenges using the service method
+    const challenges = await fetchAllChallenges();
+
+    // Respond with the challenges
+    res.status(200).json({
+      message: 'All challenges retrieved successfully',
+      challenges: challenges
+    });
+  } catch (error) {
+    console.error('Error fetching all challenges:', error);
+    res.status(500).json({ message: 'Error fetching all challenges', error: error.message });
+  }
+});
+
+
+
+// ------------- EVENTS -------------
 
 app.post('/log-event', async (req, res) => {
   try {
