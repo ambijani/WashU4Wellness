@@ -193,4 +193,25 @@ const updateUserGoalInfo = async (email, goalType, goalValue) => {
   return { goalType: user.goalType, goalValue: user.goalValue };
 };
 
-module.exports = { generateUsername, assignChallengesToNewUser, getAllTags, getUserGoalInfo, updateUserGoalInfo };
+const getUsernameById = async (userId) => {
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    return user.username;
+  } catch (error) {
+    console.error('Error fetching username:', error);
+    throw error;
+  }
+};
+
+
+module.exports = {
+  generateUsername,
+  assignChallengesToNewUser,
+  getAllTags,
+  getUserGoalInfo,
+  updateUserGoalInfo,
+  getUsernameById
+ };

@@ -12,7 +12,7 @@ app.use(express.json()); // To parse JSON bodies
 // ------------- METHOD IMPORTS -------------
 const { sendVerificationEmail, verifyToken, updateUserTags, getUserTags } = require('./services/emailService');
 const { createChallenge, updateChallenge, fetchUserChallengesByEmail } = require('./services/challengeService');
-const { getAllTags, getUserGoalInfo, updateUserGoalInfo } = require('./helper');
+const { getAllTags, getUserGoalInfo, updateUserGoalInfo, getUsernameById } = require('./helper');
 const { logEvent, fetchUserLoggedEvents  } = require('./services/eventService');
 const { getAllSingleChallengeInfo } = require('./services/leaderboardService');
 // ------------- MONGO SETUP -------------
@@ -81,6 +81,24 @@ app.post('/get-user-tags', async (req, res) => {
       res.status(404).json({ message: 'User not found', error: error.message });
     } else {
       res.status(500).json({ message: 'Error retrieving user tags', error: error.message });
+    }
+  }
+});
+
+app.post('/get-username-by-id', async (req, res) => {
+  try {
+    const { userId } = req.body;
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required' });
+    }
+    const username = await getUsernameById(userId);
+    res.status(200).json({ username });
+  } catch (error) {
+    console.error('Error in get username by ID route:', error);
+    if (error.message === 'User not found') {
+      res.status(404).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: 'Internal server error', error: error.message });
     }
   }
 });
