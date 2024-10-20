@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-const { Challenge } = require('../schemas/Challenge'); 
-const { User } = require('../schemas/User');  
+const Challenge = require('../schemas/Challenge');
+const User  = require('../schemas/User');  
 const { Team } = require('../schemas/Team');  
 
 const updateUserScore = async (email, challengeId, scoreIncrement) => {
