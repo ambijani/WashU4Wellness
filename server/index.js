@@ -126,11 +126,11 @@ app.post('/get-user-goal-info', async (req, res) => {
 // Route to update user goal info
 app.post('/update-user-goal-info', async (req, res) => {
   try {
-    const { email, goalType, goalValue } = req.body;
-    if (!email || !goalType || goalValue === undefined) {
+    const { email, goalType, goalValue: rawValue } = req.body;
+    if (!email || !goalType || rawValue === undefined) {
       return res.status(400).json({ message: 'Email, goalType, and goalValue are required' });
     }
-    goalValue = parseInt(goalValue);
+    const goalValue = parseInt(rawValue);
     const updatedGoalInfo = await updateUserGoalInfo(email, goalType, goalValue);
     res.status(200).json({ message: 'User goal info updated successfully', goalInfo: updatedGoalInfo });
   } catch (error) {
