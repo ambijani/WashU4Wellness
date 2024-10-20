@@ -92,8 +92,13 @@ const fetchUserChallengesByEmail = async (email) => {
       throw new Error('User not found');
     }
 
-    // Return the user's assigned challenges
-    return user.assignedChallenges;
+    // Filter out challenges with null challengeId
+    const validChallenges = user.assignedChallenges.filter(challenge => 
+      challenge.challengeId != null
+    );
+
+    // Return the filtered challenges
+    return validChallenges;
   } catch (error) {
     console.error('Error fetching user challenges:', error);
     throw error;
