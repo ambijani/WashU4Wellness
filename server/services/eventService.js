@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Event = require('../schemas/Event'); // Import your Event model
 const User = require('../schemas/User'); // Import your User model
 const { generateUsername } = require('../helper.js');
