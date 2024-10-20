@@ -4,6 +4,7 @@ const User = require('../schemas/User');
 const Team = require('../schemas/Team');  
 
 const updateLeaderboard = async (leaderboard, id, scoreIncrement, idField = 'userId') => {
+  scoreIncrement = parseInt(scoreIncrement);
   const index = leaderboard.findIndex(item => 
     idField === 'userId' ? item[idField].equals(id) : item[idField].every(tag => id.includes(tag))
   );

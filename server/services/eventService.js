@@ -63,6 +63,7 @@ const logEvent = async (eventData) => {
 };
 
 const updateChallengeAndTeamScores = async (challenge, user, scoreIncrement, session) => {
+  scoreIncrement = parseInt(scoreIncrement);
   // Update user's score in the challenge leaderboard
   const userLeaderboardIndex = challenge.leaderboard.users.findIndex(u => u.userId.equals(user._id));
   if (userLeaderboardIndex !== -1) {

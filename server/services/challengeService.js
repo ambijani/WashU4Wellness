@@ -6,7 +6,7 @@ const Team = require('../schemas/Team');
 const createChallenge = async (data) => {
   const session = await mongoose.startSession();
   session.startTransaction();
-
+  data.goalAmount = parseInt(data.goalAmount);
   try {
     const newChallenge = new Challenge({
       challengeName: data.challengeName,
