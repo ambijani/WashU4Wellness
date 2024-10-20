@@ -66,16 +66,13 @@ app.post('/update-user-tags', async (req, res) => {
   }
 });
 
-
-
-
 // ------------- CHALLENGE ROUTES -------------
 
 // -- CREATE CHALLENGE --
 app.post('/create-challenge', async (req, res) => {
   try {
-    const newChallenge = await createChallenge(req.body);
-    res.status(201).json({ message: 'Challenge created successfully', challenge: newChallenge });
+    await createChallenge(req.body);
+    res.status(200).json({ message: ' Challenge made successfully.'});
   } catch (error) {
     console.error('Error creating challenge:', error);
     res.status(500).json({ message: 'Error creating challenge', error: error.message });
@@ -92,6 +89,10 @@ app.put('/update-challenge/:challengeId', async (req, res) => {
   }
 });
 
+// TODO _MY: GET USER PROGRESS, HIS TEAMS. TOP TEAMS AND TOP USERS !!!
+// app.get('/get-single-challenge', async (req, res) => {
+
+// });
 // ------------- HELPER ROUTES -------------
 app.get('/get-all-activities', async (req, res) => {
   try {
@@ -115,18 +116,7 @@ app.get('/get-all-tag-choices', async (req, res) => {
 })
 
 
-// -- CHALLENGES --
-app.post('/create-challenge', async (req, res) => {
-  try {
-    await createChallenge(req.body);
-    res.status(200).json({ message: ' Challenge made successfully.'});
-  } catch (error) {
-    console.error('Error creating challenge:', error);
-    res.status(500).json({ message: 'Error creating challenge', error: error.message });
-  }
-});
-
-// -- EVENTS --
+// ------------- EVENT ROUTES -------------
 
 app.post('/log-event', async (req, res) => {
   try {
