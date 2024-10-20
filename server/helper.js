@@ -151,11 +151,33 @@ const assignChallengesToNewUser = async (email) => {
 
 // Function to get user goal info
 const getUserGoalInfo = async (email) => {
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email }).populate({
+    path: 'assignedChallenges.challengeId',
+    select: 'challengeType'
+  });
+
   if (!user) {
     throw new Error('User not found');
   }
-  return { goalType: user.goalType, goalValue: user.goalValue };
+
+  // Group challenges by type and sum scores
+  const challengeScores = user.assignedChallenges.reduce((acc, challenge) => {
+    const challengeType = challenge.challengeId.challengeType;
+    if (!acc[challengeType]) {
+      acc[challengeType] = 0;
+    }
+    acc[challengeType] += challenge.score;
+    return acc;
+  }, {});
+
+  // Convert to array format
+  const scores = Object.entries(challengeScores).map(([type, score]) => ({ type, score }));
+
+  return {
+    goalType: user.goalType,
+    goalValue: user.goalValue,
+    scores: scores
+  };
 };
 
 // Function to update user goal info
