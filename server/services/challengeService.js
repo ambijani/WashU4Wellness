@@ -115,23 +115,6 @@ const fetchAllChallenges = async () => {
   }
 };
 
-// TODO: Add a route to get a single challenge by its challengeID
-// const fetchSingleChallengeById = async (challengeID) => {
-//   try {
-//     // Find the challenge by challengeID
-//     const challenge = await Challenge.findOne({ challengeId: challengeID });
-
-//     if (!challenge) {
-//       throw new Error(`Challenge with ID ${challengeID} not found`);
-//     }
-
-//     return challenge;
-//   } catch (error) {
-//     console.error(`Error fetching challenge with ID ${challengeID}:`, error);
-//     throw error;
-//   }
-// };
-
 const updateUserAssignments = async (challenge, session) => {
   try {
     // Remove the challenge from all users who were previously assigned

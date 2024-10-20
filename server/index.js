@@ -10,11 +10,11 @@ app.use(cors());
 app.use(express.json()); // To parse JSON bodies
 
 // ------------- METHOD IMPORTS -------------
-const { sendVerificationEmail, verifyToken, updateUserTags } = require('./services/emailService');
-const { createChallenge, updateChallenge, fetchUserChallengesByEmail, fetchAllChallenges, fetchSingleChallengeById } = require('./services/challengeService');
+const { sendVerificationEmail, verifyToken, updateUserTags, getUserTags } = require('./services/emailService');
+const { createChallenge, updateChallenge, fetchUserChallengesByEmail } = require('./services/challengeService');
 const { getAllTags } = require('./helper');
 const { logEvent } = require('./services/eventService');
-
+const { getAllSingleChallengeInfo } = require('./services/leaderboardService');
 // ------------- MONGO SETUP -------------
 const uri = 'mongodb+srv://alybijani:benchode@pakiboy.rbqbd.mongodb.net/?retryWrites=true&w=majority&appName=pakiboy';
 mongoose.connect(uri)
@@ -66,6 +66,26 @@ app.post('/update-user-tags', async (req, res) => {
   }
 });
 
+// -- GET TAGS --
+app.post('/get-user-tags', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+    const userTags = await getUserTags(email);
+    res.status(200).json({ message: 'User tags retrieved successfully', tags: userTags });
+  } catch (error) {
+    console.error('Error retrieving user tags:', error);
+    if (error.message === 'User not found') {
+      res.status(404).json({ message: 'User not found', error: error.message });
+    } else {
+      res.status(500).json({ message: 'Error retrieving user tags', error: error.message });
+    }
+  }
+});
+
+
 // ------------- CHALLENGE ROUTES -------------
 
 // -- CREATE CHALLENGE --
@@ -112,27 +132,26 @@ app.post('/get-user-challenges', async (req, res) => {
   }
 });
 
-// TODO _MY: GET USER PROGRESS, HIS TEAMS. TOP TEAMS AND TOP USERS !!!
-// TODO: Add a route to get a single challenge by its challengeID
-// // Route to get a single challenge by its challengeID
-// app.get('/get-single-challenge/:challengeID', async (req, res) => {
-//   try {
-//     const { challengeID } = req.params; // Extract challengeID from URL params
+app.post('/get-single-challenge/:challengeID', async (req, res) => {
+  try {
+    const { challengeID } = req.params;
+    const { email } = req.body;
 
-//     // Call the service method to fetch the challenge
-//     const challenge = await fetchSingleChallengeById(challengeID);
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required in the request body' });
+    }
 
-//     // Respond with the challenge details
-//     res.status(200).json({
-//       message: `Challenge with ID ${challengeID} retrieved successfully`,
-//       challenge: challenge
-//     });
-//   } catch (error) {
-//     console.error('Error fetching challenge:', error);
-//     res.status(500).json({ message: 'Error fetching challenge', error: error.message });
-//   }
-// });
-
+    const challenge = await getAllSingleChallengeInfo(parseInt(challengeID), email);
+    res.status(200).json({
+      message: `Challenge with ID ${challengeID} retrieved successfully`,
+      challenge: challenge
+    });
+  } catch (error) {
+    console.error('Error fetching challenge:', error);
+    res.status(error.message.includes('not found') ? 404 : 500)
+       .json({ message: 'Error fetching challenge', error: error.message });
+  }
+});
 
 // ------------- HELPER ROUTES -------------
 app.get('/get-all-activities', async (req, res) => {

@@ -93,8 +93,80 @@ const getTopTeamsForChallenge = async (challengeId, limit = 10) => {
   }));
 };
 
+const getMyTeamsScore = async (userId, challengeId) => {
+  const user = await User.findById(userId);
+  if (!user) throw new Error('User not found');
+
+  const challenge = await Challenge.findOne({ challengeId });
+  if (!challenge) throw new Error('Challenge not found');
+
+  const userTeams = challenge.teams.filter(team => 
+    team.teamTags.some(tag => user.tags.flat().includes(tag))
+  );
+
+  return userTeams.map(team => ({
+    teamTags: team.teamTags,
+    score: team.score
+  }));
+};
+
+const getMyPersonalScore = async (userId, challengeId) => {
+  const user = await User.findById(userId);
+  if (!user) throw new Error('User not found');
+
+  const userChallenge = user.assignedChallenges.find(c => c.challengeId.toString() === challengeId.toString());
+  if (!userChallenge) throw new Error('User not assigned to this challenge');
+
+  return {
+    score: userChallenge.score,
+    assignedTags: userChallenge.assignedTags
+  };
+};
+
+const getAllSingleChallengeInfo = async (challengeId, email) => {
+  try {
+    const challenge = await Challenge.findOne({ challengeId }).lean();
+    if (!challenge) throw new Error(`Challenge with ID ${challengeId} not found`);
+
+    const topUsers = await getTopUsersForChallenge(challenge._id);
+    const topTeams = await getTopTeamsForChallenge(challenge._id);
+
+    let personalScore = null;
+    let myTeamsScore = null;
+
+    if (email) {
+      const user = await User.findOne({ email });
+      if (user) {
+        try {
+          personalScore = await getMyPersonalScore(user._id, challenge._id);
+        } catch (error) {
+          console.log('User not assigned to this challenge');
+        }
+
+        try {
+          myTeamsScore = await getMyTeamsScore(user._id, challengeId);
+        } catch (error) {
+          console.log('No teams found for this user in this challenge');
+        }
+      } else {
+        console.log('User not found with the provided email');
+      }
+    }
+
+    return {
+      ...challenge,
+      topUsers,
+      topTeams,
+      personalScore,
+      myTeamsScore
+    };
+  } catch (error) {
+    console.error(`Error fetching challenge info for ID ${challengeId}:`, error);
+    throw error;
+  }
+};
+
 module.exports = {
   updateUserScore,
-  getTopUsersForChallenge,
-  getTopTeamsForChallenge
+  getAllSingleChallengeInfo
 };

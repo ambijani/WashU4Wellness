@@ -91,8 +91,21 @@ const sendVerificationEmail = async (email) => {
   return user;
 };
 
+const getUserTags = async (email) => {
+  if (!email) {
+    throw new Error('Email is required');
+  }
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new Error('User not found');
+  }
+  return user.tags;
+};
+
+
 module.exports = {
   sendVerificationEmail,
   verifyToken,
-  updateUserTags
+  updateUserTags,
+  getUserTags
 };
