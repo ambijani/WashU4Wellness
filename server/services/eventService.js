@@ -29,7 +29,6 @@ const logEvent = async (eventData) => {
     }
 
     const newEvent = new Event({
-      eventId,
       username,
       eventName,
       activityType,
