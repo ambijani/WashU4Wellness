@@ -26,7 +26,7 @@ In today's fast-paced world, maintaining employee health is crucial for organiza
 
 - **Backend**: Node.js with Express
 - **Database**: MongoDB with Mongoose
-- **Authentication**: SendGrid
+- **Authentication/API**: SendGrid
 - **Frontend**: React-Native
 
 ## 🔮 Future Vision
