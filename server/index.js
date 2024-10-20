@@ -13,7 +13,7 @@ app.use(express.json()); // To parse JSON bodies
 const { sendVerificationEmail, verifyToken, updateUserTags, getUserTags } = require('./services/emailService');
 const { createChallenge, updateChallenge, fetchUserChallengesByEmail } = require('./services/challengeService');
 const { getAllTags } = require('./helper');
-const { logEvent } = require('./services/eventService');
+const { logEvent, fetchUserLoggedEvents  } = require('./services/eventService');
 const { getAllSingleChallengeInfo } = require('./services/leaderboardService');
 // ------------- MONGO SETUP -------------
 const uri = 'mongodb+srv://alybijani:benchode@pakiboy.rbqbd.mongodb.net/?retryWrites=true&w=majority&appName=pakiboy';
@@ -210,6 +210,31 @@ app.post('/log-event', async (req, res) => {
   } catch (error) {
     console.error('Error logging event:', error);
     res.status(500).json({ message: 'Error logging event', error: error.message });
+  }
+});
+
+app.post('/get-user-logged-events', async (req, res) => {
+  try {
+    const { email } = req.body; // Extract email from the request body
+
+    // Validate that email is provided
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    const user = generateUsername(email);
+
+    // Call the service method to fetch the logged events
+    const events = await fetchUserLoggedEvents(user);
+
+    // Respond with the logged events
+    res.status(200).json({
+      message: `Logged events for user with email ${email} retrieved successfully`,
+      events: events
+    });
+  } catch (error) {
+    console.error('Error fetching user logged events:', error);
+    res.status(500).json({ message: 'Error fetching user logged events', error: error.message });
   }
 });
 
