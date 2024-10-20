@@ -77,6 +77,61 @@ const updateChallenge = async (challengeId, data) => {
   }
 };
 
+// Function to get a user's challenges based on their email
+const fetchUserChallengesByEmail = async (email) => {
+  try {
+    // Validate email
+    if (!email) {
+      throw new Error('Email is required');
+    }
+
+    // Find the user by email and populate the assigned challenges
+    const user = await User.findOne({ email }).populate({
+      path: 'assignedChallenges.challengeId', // Populate challenge details
+      model: Challenge
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Return the user's assigned challenges
+    return user.assignedChallenges;
+  } catch (error) {
+    console.error('Error fetching user challenges:', error);
+    throw error;
+  }
+};
+
+// Function to fetch all challenges
+const fetchAllChallenges = async () => {
+  try {
+    // Find all challenges in the Challenge collection
+    const challenges = await Challenge.find();
+    return challenges;
+  } catch (error) {
+    console.error('Error fetching all challenges:', error);
+    throw error;
+  }
+};
+
+// TODO: Add a route to get a single challenge by its challengeID
+// const fetchSingleChallengeById = async (challengeID) => {
+//   try {
+//     // Find the challenge by challengeID
+//     const challenge = await Challenge.findOne({ challengeId: challengeID });
+
+//     if (!challenge) {
+//       throw new Error(`Challenge with ID ${challengeID} not found`);
+//     }
+
+//     return challenge;
+//   } catch (error) {
+//     console.error(`Error fetching challenge with ID ${challengeID}:`, error);
+//     throw error;
+//   }
+// };
+
 const updateUserAssignments = async (challenge, session) => {
   try {
     // Remove the challenge from all users who were previously assigned
@@ -140,4 +195,4 @@ const assignUsersToChallenge = async (challenge, session) => {
   return assignedUsers;
 };
 
-module.exports = { createChallenge, updateChallenge };
+module.exports = { createChallenge, updateChallenge, fetchUserChallengesByEmail, fetchAllChallenges};
