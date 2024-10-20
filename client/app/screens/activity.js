@@ -1,45 +1,64 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 
 export default function ActivityMonitor() {
   const [calories, setCalories] = useState('');
   const [steps, setSteps] = useState('');
   const [distance, setDistance] = useState('');
-
   const [hours, setHours] = useState('');
   const [minutes, setMinutes] = useState('');
   const [seconds, setSeconds] = useState('');
 
   const inputRefs = useRef([]);
 
-  // Handle Workout Time Change
-  const handleTimeChange = (value, setState, nextRefIndex) => {
-    if (value.length === 2 && nextRefIndex !== null) {
-      inputRefs.current[nextRefIndex].focus();
+  const logEvent = async (eventName, activityType, value) => {
+    const eventData = {
+      email: 'user@example.com', // Replace with dynamic user email
+      eventName,
+      activityType,
+      value,
+      dateTimeLogged: new Date().toISOString(),
+    };
+
+    try {
+      const response = await fetch('http://localhost:3000/log-event', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ event: eventData }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to log event');
+      }
+      Alert.alert(`${eventName} logged successfully!`);
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'Failed to log event');
     }
-    setState(value);
   };
 
   const handleAddCalories = () => {
-    alert(`Calories Burned: ${calories}`);
+    logEvent('Calories Burned', 'calories', calories);
     setCalories(''); // Clear input field
   };
 
   const handleAddSteps = () => {
-    alert(`Steps Taken: ${steps}`);
+    logEvent('Steps Taken', 'steps', steps);
     setSteps(''); // Clear input field
   };
 
   const handleAddWorkoutTime = () => {
     const workoutTime = `${hours}:${minutes}:${seconds}`;
-    alert(`Workout Time: ${workoutTime}`);
+    logEvent('Workout Time', 'time', workoutTime);
     setHours(''); // Clear input fields
     setMinutes('');
     setSeconds('');
   };
 
   const handleAddDistance = () => {
-    alert(`Distance: ${distance}`);
+    logEvent('Distance Covered', 'distance', distance);
     setDistance(''); // Clear input field
   };
 
@@ -161,7 +180,7 @@ const styles = StyleSheet.create({
   },
   timeInput: {
     width: 50,
-    height: 50, // Ensure the height is equal to the width to make it square
+    height: 50,
     textAlign: 'center',
   },
   colon: {

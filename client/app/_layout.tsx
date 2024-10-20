@@ -7,8 +7,10 @@ import SignupScreen from '@/app/screens/signup';
 import VerificationScreen from '@/app/screens/verification';
 import ActivityScreen from '@/app/screens/activity';
 import HomeScreen from '@/app/screens/home';
-import CreateEventScreen from '@/app/screens/createEvent'
-import DetailScreen from '@/app/screens/detailedChallenge'
+import CreateChallengeScreen from '@/app/screens/CreateChallengeScreen'
+import ChallengePage from '@/app/screens/detailedChallenge'
+import PersonalizationScreen from '@/app/screens/personalization'
+
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -19,7 +21,8 @@ function DrawerNavigator() {
     <Drawer.Navigator initialRouteName="Home">
       <Drawer.Screen name="Home" component={HomeScreen} />
       <Drawer.Screen name="Activity" component={ActivityScreen} />
-      <Drawer.Screen name="CreateEvent" component={CreateEventScreen} />
+      <Drawer.Screen name="Create Challenge" component={CreateChallengeScreen} />
+      <Drawer.Screen name="Personalization" component={PersonalizationScreen} />
     </Drawer.Navigator>
   );
 }
@@ -35,8 +38,7 @@ export default function App() {
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Signup" component={SignupScreen} />
         <Stack.Screen name="Verification" component={VerificationScreen} />
-        <Stack.Screen name="Activity" component={ActivityScreen} />
-        <Stack.Screen name="Details" component={DetailScreen} />
+        <Stack.Screen name="ChallengePage" component={ChallengePage} />
       </Stack.Navigator>
     </NavigationContainer>
   );
