@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
-const { Challenge } = require('../schemas/Challenge');
+//incorrect
+// const { Challenge } = require('../schemas/Challenge'); 
+//correct
+const Challenge = require('../schemas/Challenge');
 const User = require('../schemas/User');
 const Team = require('../schemas/Team');
 
