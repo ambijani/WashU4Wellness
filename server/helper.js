@@ -67,6 +67,7 @@ const assignChallengesToNewUser = async (email) => {
       endDateTime: { $gte: currentDate }
     }).session(session);
     console.log('Active challenges found:', activeChallenges.length);
+    console.log('!!Active challenge detail:', activeChallenges);
     
     // Array to store challenges to be assigned
     const challengesToAssign = [];

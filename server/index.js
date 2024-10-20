@@ -11,7 +11,7 @@ app.use(express.json()); // To parse JSON bodies
 
 // ------------- METHOD IMPORTS -------------
 const { sendVerificationEmail, verifyToken, updateUserTags } = require('./services/emailService');
-const { createChallenge, updateChallenge } = require('./services/challengeService');
+const { createChallenge, updateChallenge, fetchUserChallengesByEmail, fetchAllChallenges, fetchSingleChallengeById } = require('./services/challengeService');
 const { getAllTags } = require('./helper');
 const { logEvent } = require('./services/eventService');
 
@@ -116,7 +116,77 @@ app.get('/get-all-tag-choices', async (req, res) => {
 })
 
 
-// ------------- EVENT ROUTES -------------
+// -- CHALLENGES --
+app.post('/create-challenge', async (req, res) => {
+  try {
+    await createChallenge(req.body);
+    res.status(200).json({ message: ' Challenge made successfully.'});
+  } catch (error) {
+    console.error('Error creating challenge:', error);
+    res.status(500).json({ message: 'Error creating challenge', error: error.message });
+  }
+});
+
+app.post('/get-user-challenges', async (req, res) => {
+  try {
+    const { email } = req.body; // Use query parameters for GET requests
+    console.log('Email:', email);
+    // Validate that email is provided
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    // Call the method from challengeService.js to fetch challenges
+    const challenges = await fetchUserChallengesByEmail(email);
+
+    // Respond with the user's challenges
+    res.status(200).json({
+      message: 'User challenges retrieved successfully',
+      challenges: challenges
+    });
+  } catch (error) {
+    console.error('Error fetching user challenges:', error);
+    res.status(500).json({ message: 'Error fetching user challenges', error: error.message });
+  }
+});
+
+app.get('/get-all-challenges', async (req, res) => {
+  try {
+    // Fetch all challenges using the service method
+    const challenges = await fetchAllChallenges();
+
+    // Respond with the challenges
+    res.status(200).json({
+      message: 'All challenges retrieved successfully',
+      challenges: challenges
+    });
+  } catch (error) {
+    console.error('Error fetching all challenges:', error);
+    res.status(500).json({ message: 'Error fetching all challenges', error: error.message });
+  }
+});
+
+// TODO: Add a route to get a single challenge by its challengeID
+// // Route to get a single challenge by its challengeID
+// app.get('/get-single-challenge/:challengeID', async (req, res) => {
+//   try {
+//     const { challengeID } = req.params; // Extract challengeID from URL params
+
+//     // Call the service method to fetch the challenge
+//     const challenge = await fetchSingleChallengeById(challengeID);
+
+//     // Respond with the challenge details
+//     res.status(200).json({
+//       message: `Challenge with ID ${challengeID} retrieved successfully`,
+//       challenge: challenge
+//     });
+//   } catch (error) {
+//     console.error('Error fetching challenge:', error);
+//     res.status(500).json({ message: 'Error fetching challenge', error: error.message });
+//   }
+// });
+
+// -- EVENTS --
 
 app.post('/log-event', async (req, res) => {
   try {

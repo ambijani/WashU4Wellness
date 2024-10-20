@@ -27,12 +27,13 @@ const verifyToken = async (email, token) => {
   }
   console.log('User verified:', user.email);
   // Assign challenges to this user using email
-  try {
-    await assignChallengesToNewUser(email);
-  } catch (error) {
-    console.error('Error assigning challenges:', error);
-    // Decide whether to throw this error or handle it silently
-  }
+  // TODO: comment this out
+  // try {
+  //   await assignChallengesToNewUser(email);
+  // } catch (error) {
+  //   console.error('Error assigning challenges:', error);
+  //   // Decide whether to throw this error or handle it silently
+  // }
   return user;
 };
 
