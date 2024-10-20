@@ -174,8 +174,6 @@ app.get('/get-all-challenges', async (req, res) => {
   }
 });
 
-
-
 // ------------- EVENTS -------------
 
 app.post('/log-event', async (req, res) => {
