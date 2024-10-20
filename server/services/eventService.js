@@ -49,4 +49,21 @@ const logEvent = async (eventData) => {
   }
 };
 
-module.exports = { logEvent };
+// Function to fetch logged events by user email (or userId)
+const fetchUserLoggedEvents = async (username) => {
+  try {
+    // Find all events logged by the user with the given email
+    const events = await Event.find({ username });
+
+    if (!events || events.length === 0) {
+      throw new Error(`No events found for user with username ${username}`);
+    }
+
+    return events;
+  } catch (error) {
+    console.error(`Error fetching logged events for user with username ${username}:`, error);
+    throw error;
+  }
+};
+
+module.exports = { logEvent, fetchUserLoggedEvents };
