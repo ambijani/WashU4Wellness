@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ActivityMonitor() {
   const [calories, setCalories] = useState('');
@@ -8,17 +9,29 @@ export default function ActivityMonitor() {
   const [hours, setHours] = useState('');
   const [minutes, setMinutes] = useState('');
   const [seconds, setSeconds] = useState('');
+  const [email, setEmail] = useState(''); // State to store email
 
   const inputRefs = useRef([]);
 
+  // Fetch email when component mounts
+  useEffect(() => {
+    const fetchEmail = async () => {
+      const storedEmail = await AsyncStorage.getItem('userEmail');
+      if (storedEmail) {
+        setEmail(storedEmail);
+      }
+    };
+    fetchEmail();
+  }, []);
+
   const logEvent = async (eventName, activityType, value) => {
     const eventData = {
-      email: 'user@example.com', // Replace with dynamic user email
+      email: email,
       eventName,
       activityType,
       value,
-      dateTimeLogged: new Date().toISOString(),
     };
+
 
     try {
       const response = await fetch('http://localhost:3000/log-event', {

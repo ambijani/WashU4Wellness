@@ -96,6 +96,31 @@ export default function ProfileSettings() {
     setState(value);
   };
 
+  const handleDailyGoalUpdate = async (goalType, goalValue) => {
+    try {
+      const response = await fetch('http://localhost:3000/update-user-goal-info', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email,
+          goalType: goalType,
+          goalValue: goalValue,
+        }),
+      });
+  
+      if (response.ok) {
+        Alert.alert(`Updated ${goalType}: ${goalValue}`);
+      } else {
+        const errorData = await response.json();
+        Alert.alert('Error', errorData.message || 'Failed to update goal.');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Unable to update goal. Please try again.');
+      console.error(error);
+    }
+  };
+  
+
   const handleUpdate = async (label, value) => {
     let updatedTags = [...currentTags];
 
@@ -230,36 +255,37 @@ export default function ProfileSettings() {
       </Picker>
 
       {dailyGoalCategory === 'calories' && (
-        <>
-          <TextInput style={styles.input} placeholder="Enter calories" value={calories} keyboardType="numeric" onChangeText={setCalories} />
-          <Button title="Add Calories" onPress={() => console.log('Calories Burned', calories)} />
-        </>
-      )}
+  <>
+    <TextInput style={styles.input} placeholder="Enter calories" value={calories} keyboardType="numeric" onChangeText={setCalories} />
+    <Button title="Add Calories" onPress={() => handleDailyGoalUpdate('calories', calories)} />
+  </>
+)}
 
-      {dailyGoalCategory === 'steps' && (
-        <>
-          <TextInput style={styles.input} placeholder="Enter steps" value={steps} keyboardType="numeric" onChangeText={setSteps} />
-          <Button title="Add Steps" onPress={() => console.log('Steps Taken', steps)} />
-        </>
-      )}
+{dailyGoalCategory === 'steps' && (
+  <>
+    <TextInput style={styles.input} placeholder="Enter steps" value={steps} keyboardType="numeric" onChangeText={setSteps} />
+    <Button title="Add Steps" onPress={() => handleDailyGoalUpdate('steps', steps)} />
+  </>
+)}
 
-      {dailyGoalCategory === 'distance' && (
-        <>
-          <TextInput style={styles.input} placeholder="Enter distance (miles)" value={distance} keyboardType="numeric" onChangeText={setDistance} />
-          <Button title="Add Distance" onPress={() => console.log('Distance Traveled', distance)} />
-        </>
-      )}
+{dailyGoalCategory === 'distance' && (
+  <>
+    <TextInput style={styles.input} placeholder="Enter distance (miles)" value={distance} keyboardType="numeric" onChangeText={setDistance} />
+    <Button title="Add Distance" onPress={() => handleDailyGoalUpdate('distance', distance)} />
+  </>
+)}
 
-      {dailyGoalCategory === 'time' && (
-        <View style={styles.timeInputContainer}>
-          <TextInput style={[styles.input, styles.timeInput]} keyboardType="numeric" maxLength={2} placeholder="HH" value={hours} onChangeText={(value) => handleTimeChange(value, setHours, 1)} ref={(ref) => (inputRefs.current[0] = ref)} />
-          <Text style={styles.colon}>:</Text>
-          <TextInput style={[styles.input, styles.timeInput]} keyboardType="numeric" maxLength={2} placeholder="MM" value={minutes} onChangeText={(value) => handleTimeChange(value, setMinutes, 2)} ref={(ref) => (inputRefs.current[1] = ref)} />
-          <Text style={styles.colon}>:</Text>
-          <TextInput style={[styles.input, styles.timeInput]} keyboardType="numeric" maxLength={2} placeholder="SS" value={seconds} onChangeText={(value) => handleTimeChange(value, setSeconds, null)} ref={(ref) => (inputRefs.current[2] = ref)} />
-          <Button title="Add Time" onPress={() => console.log('Time Tracked', `${hours}:${minutes}:${seconds}`)} />
-        </View>
-      )}
+{dailyGoalCategory === 'time' && (
+  <View style={styles.timeInputContainer}>
+    <TextInput style={[styles.input, styles.timeInput]} keyboardType="numeric" maxLength={2} placeholder="HH" value={hours} onChangeText={(value) => handleTimeChange(value, setHours, 1)} ref={(ref) => (inputRefs.current[0] = ref)} />
+    <Text style={styles.colon}>:</Text>
+    <TextInput style={[styles.input, styles.timeInput]} keyboardType="numeric" maxLength={2} placeholder="MM" value={minutes} onChangeText={(value) => handleTimeChange(value, setMinutes, 2)} ref={(ref) => (inputRefs.current[1] = ref)} />
+    <Text style={styles.colon}>:</Text>
+    <TextInput style={[styles.input, styles.timeInput]} keyboardType="numeric" maxLength={2} placeholder="SS" value={seconds} onChangeText={(value) => handleTimeChange(value, setSeconds, null)} ref={(ref) => (inputRefs.current[2] = ref)} />
+    <Button title="Add Time" onPress={() => handleDailyGoalUpdate('time', `${hours}:${minutes}:${seconds}`)} />
+  </View>
+)}
+
 
     </View>
   );
