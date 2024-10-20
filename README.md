@@ -42,7 +42,7 @@ Wash4Wellness addresses this challenge with a comprehensive platform featuring b
    - Oversee user accounts and team assignments
 
 3. **Challenge Overview**: 
-   - View all active and past challenges
+   - View all active challenges
    - Access participation statistics and health trends
 
 ## How It Works
