@@ -1,26 +1,57 @@
-# WashUWellness: Gamifying Organizational Health
+# WashUWellness: Empowering Healthy Institutions
 
-## 🚀 Mission
+## The Problem
 
-WashUWellness is on a mission to revolutionize organizational health by turning wellness into an engaging, community-driven experience. Our platform empowers organizations to foster a culture of health and well-being through gamification, challenges, and data-driven insights.
+Institutions like universities lack efficient ways to track and gather information about the health of their users or students. This gap hinders their ability to promote and maintain a healthy community.
 
-## 🌟 Key Features
+## Our Solution
 
-- **Event Logging**: Users can easily log their health-related activities, from steps taken to calories burned.
-- **Custom Challenges**: Organizations can create and manage health challenges to boost engagement.
-- **Leaderboards**: Foster friendly competition with real-time leaderboards.
-- **Activity Analytics**: Gain insights into organizational health trends with comprehensive analytics.
-- **User Verification**: Secure email verification system to ensure user authenticity.
+WashUWellness addresses this challenge with a comprehensive platform featuring both admin health panels and user panels. This dual approach allows for:
 
-## 💡 Why WashUWellness?
+1. Individual health tracking for users
+2. Health gamification through admin-created challenges
 
-In today's fast-paced world, maintaining employee health is crucial for organizational success. WashUWellness provides a scalable solution that:
+## Key Features
 
-1. **Increases Engagement**: By gamifying health activities, we make wellness fun and interactive.
-2. **Improves Health Outcomes**: Regular challenges and peer motivation lead to better health habits.
-3. **Boosts Productivity**: Healthier employees are more productive and take fewer sick days.
-4. **Enhances Company Culture**: Foster a supportive community centered around well-being.
-5. **Provides Valuable Insights**: Data-driven approach helps organizations tailor their wellness programs.
+### User View
+
+1. **Streamlined Sign-In Process**: 
+   - Easy registration and secure authentication
+   - Quick profile setup to capture health interests
+
+2. **Personal Goal Setting**: 
+   - Users can create and track individual health objectives
+
+3. **Interest-Based Challenges**: 
+   - Automatic assignment to challenges based on user interests
+   - Team competitions (e.g., Class of 2025 CS vs. Class of 2024 CS)
+
+4. **Challenge Insights**: 
+   - View detailed challenge information
+   - Track personal contributions
+   - See top contributors and team standings
+
+### Admin View
+
+1. **Challenge Creation**: 
+   - Set up new health challenges
+   - Customize challenge parameters and goals
+
+2. **User Management**: 
+   - Promote users to admin status
+   - Oversee user accounts and team assignments
+
+3. **Challenge Overview**: 
+   - View all active and past challenges
+   - Access participation statistics and health trends
+
+## How It Works
+
+1. Users sign up and set their health interests
+2. Admins create engaging health challenges
+3. Users are automatically assigned to relevant challenges and teams
+4. Participants log their activities and track progress
+5. Admins monitor overall health trends and challenge success
 
 ## 🛠 Technology Stack
 
@@ -29,22 +60,20 @@ In today's fast-paced world, maintaining employee health is crucial for organiza
 - **Authentication/API**: SendGrid
 - **Frontend**: React-Native
 
-## 🔮 Future Vision
+## Future Vision
 
 While our MVP is tailored for Washington University, WashUWellness is designed with scalability in mind. Our goal is to extend this platform to businesses, educational institutions, and organizations worldwide, creating a global movement towards better organizational health.
 
-## 💪 Impact
+## Impact
 
-By choosing WashUWellness, organizations can:
+WashUWellness enables institutions to:
+- Gain real-time insights into community health
+- Foster a culture of wellness through friendly competition
+- Make data-driven decisions to improve overall health initiatives
 
-- Reduce healthcare costs
-- Improve employee satisfaction and retention
-- Create a positive, health-focused work environment
-- Gain a competitive edge in talent acquisition
+## Join the Wellness Revolution!
 
-## 🤝 Join the Wellness Revolution!
-
-WashUWellness isn't just a platform; it's a step towards a healthier, happier world. Join us in redefining organizational wellness, one challenge at a time!
+Help us redefine institutional health, one challenge at a time.
 
 ---
 
