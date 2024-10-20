@@ -161,12 +161,16 @@ const getUserGoalInfo = async (email) => {
   }
 
   // Group challenges by type and sum scores
-  const challengeScores = user.assignedChallenges.reduce((acc, challenge) => {
-    const challengeType = challenge.challengeId.challengeType;
-    if (!acc[challengeType]) {
-      acc[challengeType] = 0;
+  const challengeScores = user.assignedChallenges.reduce((acc, challenge, index) => {
+    if (challenge && challenge.challengeId && challenge.challengeId.challengeType) {
+      const challengeType = challenge.challengeId.challengeType;
+      if (!acc[challengeType]) {
+        acc[challengeType] = 0;
+      }
+      acc[challengeType] += challenge.score || 0;
+    } else {
+      console.log(`Skipping invalid challenge at index ${index}:`, challenge);
     }
-    acc[challengeType] += challenge.score;
     return acc;
   }, {});
 

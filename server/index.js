@@ -103,6 +103,10 @@ app.post('/get-username-by-id', async (req, res) => {
   }
 });
 
+// app.post('/get-username-by-id', async (req, res) => {
+
+//   try {
+//     >
 // ------------- USER GOAL INFO -------------
 // Route to get user goal info
 app.post('/get-user-goal-info', async (req, res) => {
