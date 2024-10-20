@@ -1,22 +1,28 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { SafeAreaView, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import StatusBarComponent from '../../components/challengeBar';
 
-export default function HomeScreen() {
+const HomeScreen = () => {
+  const navigation = useNavigation();
+
+  const handlePress = () => {
+    navigation.navigate('Details');
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.stuffText}>STUFF</Text>
-    </View>
+    <SafeAreaView>
+      {/* Make this instance clickable */}
+      <TouchableOpacity onPress={handlePress}>
+        <StatusBarComponent
+          primaryText="Task Progress"
+          secondaryText="Remaining"
+          statusValue={75}
+          largeText="75%"
+        />
+      </TouchableOpacity>
+    </SafeAreaView>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  stuffText: {
-    fontSize: 100,
-    fontWeight: 'bold',
-  },
-});
+export default HomeScreen;
