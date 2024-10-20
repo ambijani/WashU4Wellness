@@ -11,7 +11,7 @@ const createEmptyTeam = (tagChoices) => {
   return team;
 };
 
-export default function CreateEventScreen() {
+export default function CreateChallengeScreen() {
   const [name, setName] = useState('');
   const [type, setType] = useState('');
   const [description, setDescription] = useState('');
