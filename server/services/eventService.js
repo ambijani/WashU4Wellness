@@ -50,8 +50,9 @@ const logEvent = async (eventData) => {
 };
 
 // Function to fetch logged events by user email (or userId)
-const fetchUserLoggedEvents = async (username) => {
+const fetchUserLoggedEvents = async (email) => {
   try {
+    const username = generateUsername(email);
     // Find all events logged by the user with the given email
     const events = await Event.find({ username });
 
