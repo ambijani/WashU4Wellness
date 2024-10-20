@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
-const { Challenge } = require('../schemas/Challenge'); 
-const { User } = require('../schemas/User');  
-const { Team } = require('../schemas/Team');  
+const Challenge = require('../schemas/Challenge'); 
+const User = require('../schemas/User');  
+const Team = require('../schemas/Team');  
 
 const updateLeaderboard = async (leaderboard, id, scoreIncrement, idField = 'userId') => {
   const index = leaderboard.findIndex(item => 

@@ -10,7 +10,7 @@ const logEvent = async (eventData) => {
   session.startTransaction();
 
   try {
-    const { eventId, email, eventName, activityType, value, dateTimeLogged } = eventData;
+    const { email, eventName, activityType, value, dateTimeLogged } = eventData;
 
     if (!email || !eventName || !activityType || !value) {
       throw new Error('Missing required fields');
