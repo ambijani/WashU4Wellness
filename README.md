@@ -62,7 +62,7 @@ Wash4Wellness addresses this challenge with a comprehensive platform featuring b
 
 ## Future Vision
 
-While our MVP is tailored for Washington University, Wash4Wellness is designed with scalability in mind. Our goal is to extend this platform to businesses, educational institutions, and organizations worldwide, creating a global movement towards better organizational health.
+While our MVP is tailored for Washington University, Wash4Wellness is designed with scalability in mind. Our goal is to extend this platform to businesses, educational institutions, and organizations worldwide, creating a global movement towards better organizational health. In addition to that we're looking to integrate APIs from different wearable devices and health apps.
 
 ## Impact
 
