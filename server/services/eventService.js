@@ -1,4 +1,5 @@
 // Function to log an event
+const mongoose = require('mongoose');
 const Event = require('../schemas/Event');
 const User = require('../schemas/User');
 const Team = require('../schemas/Team');
