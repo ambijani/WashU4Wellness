@@ -1,4 +1,4 @@
-# WashUWellness: Empowering Healthy Institutions
+# Wash4Wellness: Empowering Healthy Institutions
 
 ## The Problem
 
@@ -6,7 +6,7 @@ Institutions like universities lack efficient ways to track and gather informati
 
 ## Our Solution
 
-WashUWellness addresses this challenge with a comprehensive platform featuring both admin health panels and user panels. This dual approach allows for:
+Wash4Wellness addresses this challenge with a comprehensive platform featuring both admin health panels and user panels. This dual approach allows for:
 
 1. Individual health tracking for users
 2. Health gamification through admin-created challenges
@@ -62,11 +62,11 @@ WashUWellness addresses this challenge with a comprehensive platform featuring b
 
 ## Future Vision
 
-While our MVP is tailored for Washington University, WashUWellness is designed with scalability in mind. Our goal is to extend this platform to businesses, educational institutions, and organizations worldwide, creating a global movement towards better organizational health.
+While our MVP is tailored for Washington University, Wash4Wellness is designed with scalability in mind. Our goal is to extend this platform to businesses, educational institutions, and organizations worldwide, creating a global movement towards better organizational health.
 
 ## Impact
 
-WashUWellness enables institutions to:
+Wash4Wellness enables institutions to:
 - Gain real-time insights into community health
 - Foster a culture of wellness through friendly competition
 - Make data-driven decisions to improve overall health initiatives
@@ -77,4 +77,4 @@ Help us redefine institutional health, one challenge at a time.
 
 ---
 
-Developed with ❤️ by Team WashUWellness
+Developed with ❤️ by Team Wash4Wellness
