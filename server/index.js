@@ -222,10 +222,8 @@ app.post('/get-user-logged-events', async (req, res) => {
       return res.status(400).json({ message: 'Email is required' });
     }
 
-    const user = generateUsername(email);
-
     // Call the service method to fetch the logged events
-    const events = await fetchUserLoggedEvents(user);
+    const events = await fetchUserLoggedEvents(email);
 
     // Respond with the logged events
     res.status(200).json({
